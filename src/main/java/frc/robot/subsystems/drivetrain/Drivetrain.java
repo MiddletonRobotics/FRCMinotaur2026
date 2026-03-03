@@ -90,14 +90,11 @@ public class Drivetrain extends SubsystemBase {
     }
 
     private void configurePathPlanner() {
-
-        try{
+        try {
             robotConfig = RobotConfig.fromGUISettings();
         } catch (Exception e) {
-            // Handle exception as needed
             e.printStackTrace();
         }
-
 
         AutoBuilder.configure(
             () -> robotState.getLatestFieldToRobot().getValue(),
@@ -105,8 +102,8 @@ public class Drivetrain extends SubsystemBase {
             robotState::getLatestDesiredRobotRelativeChassisSpeeds,
             (speeds, feedforwards) -> applyPathPlannerRequest(speeds, feedforwards.robotRelativeForcesX(), feedforwards.robotRelativeForcesY()),
             new PPHolonomicDriveController(
-                new PIDConstants(5.0, 0, 0), 
-                new PIDConstants(5.0, 0, 0)
+                new PIDConstants(DrivetrainConstants.kPathPlannerDriveHolonomicControllerP, DrivetrainConstants.kPathPlannerDriveHolonomicControllerI, DrivetrainConstants.kPathPlannerDriveHolonomicControllerD), 
+                new PIDConstants(DrivetrainConstants.kPathPlannerSteerHolonomicControllerP, DrivetrainConstants.kPathPlannerSteerHolonomicControllerI, DrivetrainConstants.kPathPlannerSteerHolonomicControllerD)
             ),
             robotConfig,
             robotState::isRedAlliance,
