@@ -32,6 +32,7 @@ import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
@@ -64,9 +65,8 @@ public class IntakeIOHardware implements IntakeIO {
     private final StatusSignal<Temperature> rollerTemperature;
 
     private final NeutralOut neutralRequest = new NeutralOut();
-    private final VoltageOut voltageRequest = new VoltageOut(0.0).withUpdateFreqHz(0.0);
+    private final VoltageOut voltageRequest = new VoltageOut(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
     private final TorqueCurrentFOC torqueCurrentRequest = new TorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
-    private final VelocityTorqueCurrentFOC velocityTorqueCurrentRequest = new VelocityTorqueCurrentFOC(0.0);
 
     private final RelativeEncoder pivotEncoder;
     private final SparkClosedLoopController pivotPositionController;
@@ -120,12 +120,7 @@ public class IntakeIOHardware implements IntakeIO {
         pivotMotorConfiguration.closedLoop
             .p(0)
             .i(0)
-            .d(0)
-            .feedForward
-                .kS(0)
-                .kV(0)
-                .kCos(0)
-                .kA(0);
+            .d(0);
 
         tryUntilOk(pivotMotor, 5, () -> pivotMotor.configure(pivotMotorConfiguration, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
         tryUntilOk(pivotMotor, 5, () -> pivotEncoder.setPosition(0.0));
@@ -179,18 +174,13 @@ public class IntakeIOHardware implements IntakeIO {
     }
 
     @Override
-    public void setPivotPosition(double position) {
-        pivotPositionController.setSetpoint(position, ControlType.kPosition, ClosedLoopSlot.kSlot0);
+    public void setPivotPosition(double position, double feedforward) {
+        pivotPositionController.setSetpoint(position, ControlType.kPosition, ClosedLoopSlot.kSlot0, feedforward, ArbFFUnits.kVoltage);
     }
 
     @Override
     public void setRollerTorqueCurrent(double amperes) {
         rollerMotor.setControl(torqueCurrentRequest.withOutput(amperes));
-    }
-
-    @Override
-    public void setRollerVelocity(double velocity) {
-        rollerMotor.setControl(velocityTorqueCurrentRequest.withVelocity(velocity));
     }
 
     @Override

@@ -1,5 +1,6 @@
 package frc.robot.subsystems.intake;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
@@ -13,11 +14,13 @@ import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
@@ -31,31 +34,18 @@ public class IntakeIOSimulation implements IntakeIO {
     private final DCMotor rollerGearbox;
     private final DCMotorSim rollerSimulation;
     private double rollerAppliedVoltage = 0.0;
-    private Double rollerVelocitySetpoint = null;
 
     private final DCMotor pivotGearbox;
     private final SingleJointedArmSim pivotSimulation;
     private double pivotAppliedVoltage = 0.0;
-    private Double pivotPositionSetpoint  = null;
 
-    private static final LoggedTunableNumber rollerKp  = new LoggedTunableNumber("Intake/Roller/kP", IntakeConstants.rollerSimulatedKp);
-    private static final LoggedTunableNumber rollerKd  = new LoggedTunableNumber("Intake/Roller/kD", IntakeConstants.rollerSimulatedKd);
-    private static final LoggedTunableNumber rollerKs  = new LoggedTunableNumber("Intake/Roller/kS", IntakeConstants.rollerSimulatedKs);
-    private static final LoggedTunableNumber rollerKv  = new LoggedTunableNumber("Intake/Roller/kV", IntakeConstants.rollerSimulatedKv);
-    private static final LoggedTunableNumber rollerKa  = new LoggedTunableNumber("Intake/Roller/kA", IntakeConstants.rollerSimulatedKa);
+    private final PIDController pivotController = new PIDController(0.0, 0.0, 0.0);
 
-    private static final LoggedTunableNumber pivotKp   = new LoggedTunableNumber("Intake/Pivot/kP", IntakeConstants.pivotSimulatedKp);
-    private static final LoggedTunableNumber pivotKd   = new LoggedTunableNumber("Intake/Pivot/kD", IntakeConstants.pivotSimulatedKd);
-    private static final LoggedTunableNumber pivotKs   = new LoggedTunableNumber("Intake/Pivot/kS", IntakeConstants.pivotSimulatedKs);
-    private static final LoggedTunableNumber pivotKv   = new LoggedTunableNumber("Intake/Pivot/kV", IntakeConstants.pivotSimulatedKv);
-    private static final LoggedTunableNumber pivotKa   = new LoggedTunableNumber("Intake/Pivot/kA", IntakeConstants.pivotSimulatedKa);
-    private static final LoggedTunableNumber pivotKCos = new LoggedTunableNumber("Intake/Pivot/kCos", IntakeConstants.pivotSimulatedKCos);
+    private boolean pivotControllerNeedsReset = false;
+    private boolean pivotClosedLoop = true;
+    private static final Angle pivotStartAngle = Degrees.of(80);
 
-    private final ProfiledPIDController rollerController;
-    private SimpleMotorFeedforward rollerFeedforward;
-
-    private final ProfiledPIDController pivotController;
-    private ArmFeedforward pivotFeedforward;
+    private boolean wasNotAuto = true;
 
     private final LoggedMechanism2d mechanism = new LoggedMechanism2d(
         IntakeConstants.kIntakeLength.in(Meters) * 3,
@@ -96,15 +86,6 @@ public class IntakeIOSimulation implements IntakeIO {
             rollerGearbox
         );
 
-        rollerController = new ProfiledPIDController(rollerKp.get(), 0.0, rollerKd.get(),
-            new TrapezoidProfile.Constraints(
-                IntakeConstants.kRollerMaximumRotationalVelocity.in(RadiansPerSecond),
-                IntakeConstants.kRollerMaximumRotationalAcceleration.in(RadiansPerSecondPerSecond)
-            )
-        );
-
-        rollerFeedforward = new SimpleMotorFeedforward(rollerKs.get(), rollerKv.get(), rollerKa.get());
-
         pivotGearbox = IntakeConstants.kPivotSimulatedGearbox;
         pivotSimulation = new SingleJointedArmSim(
             pivotGearbox,
@@ -116,76 +97,20 @@ public class IntakeIOSimulation implements IntakeIO {
             true, 
             IntakeConstants.kIntakeStartingPosition.in(Radians)
         );
-
-        pivotController = new ProfiledPIDController(pivotKp.get(), 0.0, pivotKd.get(),
-            new TrapezoidProfile.Constraints(
-                IntakeConstants.kPivotMaximumRotationalVelocity.in(RadiansPerSecond),
-                IntakeConstants.kPivotMaximumRotationalAcceleration.in(RadiansPerSecondPerSecond)
-            )
-        );
-
-        pivotFeedforward = new ArmFeedforward(
-            pivotKs.get(), pivotKCos.get(), pivotKv.get(), pivotKa.get()
-        );
     }
 
     @Override
     public void updateInputs(IntakeIOInputs inputs) {
         if (DriverStation.isDisabled()) {
-            rollerVelocitySetpoint = null; // Might remove beacuse of transition between autonomous and teleop
-            pivotPositionSetpoint  = null;
-
-            setRollerVoltage(0.0);
-            setPivotVoltage(0.0);
+            pivotControllerNeedsReset = true;
         }
 
-        if (
-            rollerKp.hasChanged(hashCode()) ||
-            rollerKd.hasChanged(hashCode()) ||
-            rollerKs.hasChanged(hashCode()) ||
-            rollerKv.hasChanged(hashCode()) ||
-            rollerKa.hasChanged(hashCode())
-        ) {
-            rollerController.setPID(rollerKp.get(), 0.0, rollerKd.get());
-            rollerFeedforward = new SimpleMotorFeedforward(
-                rollerKs.get(), rollerKv.get(), rollerKa.get()
-            );
+        if (wasNotAuto && DriverStation.isAutonomousEnabled()) {
+            pivotSimulation.setState(pivotStartAngle.in(Radians), 0.0);
+            wasNotAuto = false;
         }
 
-        if (
-            pivotKp.hasChanged(hashCode()) ||
-            pivotKd.hasChanged(hashCode()) ||
-            pivotKs.hasChanged(hashCode()) ||
-            pivotKv.hasChanged(hashCode()) ||
-            pivotKa.hasChanged(hashCode()) ||
-            pivotKCos.hasChanged(hashCode())
-        ) {
-            pivotController.setPID(pivotKp.get(), 0.0, pivotKd.get());
-            pivotFeedforward = new ArmFeedforward(
-                pivotKs.get(), pivotKCos.get(), pivotKv.get(), pivotKa.get()
-            );
-        }
-
-        if (rollerVelocitySetpoint != null) {
-            double pidOutput = rollerController.calculate(rollerSimulation.getAngularVelocityRadPerSec(), rollerVelocitySetpoint);
-            double ffOutput = rollerFeedforward.calculateWithVelocities(
-                rollerController.getSetpoint().velocity,
-                rollerController.getSetpoint().velocity
-            );
-
-            setRollerVoltage(pidOutput + ffOutput);
-        }
-
-        if (pivotPositionSetpoint != null) {
-            double pidOutput = pivotController.calculate(pivotSimulation.getAngleRads(), pivotPositionSetpoint);
-            double ffOutput = pivotFeedforward.calculateWithVelocities(
-                pivotSimulation.getAngleRads(),
-                pivotController.getSetpoint().velocity,
-                pivotController.getSetpoint().velocity
-            );
-
-            setPivotVoltage(pidOutput + ffOutput);
-        }
+        wasNotAuto = !DriverStation.isAutonomousEnabled();
 
         rollerSimulation.update(0.02);
         pivotSimulation.update(0.02);
@@ -227,25 +152,36 @@ public class IntakeIOSimulation implements IntakeIO {
         ));
     }
 
-     @Override
-    public void setRollerVelocity(double velocity) {
-        rollerVelocitySetpoint = velocity;
-    }
-
     @Override
     public void setPivotVoltage(double voltage) {
+        pivotClosedLoop = false;
         pivotAppliedVoltage = MathUtil.clamp(voltage, -12.0, 12.0);
         pivotSimulation.setInputVoltage(pivotAppliedVoltage);
     }
 
     @Override
-    public void setPivotPosition(double position) {
-        pivotPositionSetpoint = position;
+    public void setPivotPosition(double position, double feedforward) {
+        if(!pivotClosedLoop) {
+            pivotControllerNeedsReset = true;
+            pivotClosedLoop = true;
+        }
+
+        if(pivotControllerNeedsReset) {
+            pivotController.reset();
+            pivotControllerNeedsReset = false;
+        }
+
+        setPivotVoltage(pivotController.calculate(pivotSimulation.getAngleRads(), position) + feedforward);
     }
 
     @Override
     public void stopRollers() {
         setRollerVoltage(0.0);
+    }
+
+    @Override
+    public void setPivotPID(double kP, double kI, double kD) {
+        pivotController.setPID(kP, kI, kD);
     }
 
     private void updateRollerColor() {
