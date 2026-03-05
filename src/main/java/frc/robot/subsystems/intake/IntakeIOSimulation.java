@@ -5,7 +5,6 @@ import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
 
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
@@ -13,21 +12,16 @@ import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
-
-import frc.minolib.advantagekit.LoggedTunableNumber;
+import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.IntakeConstants;
 
 public class IntakeIOSimulation implements IntakeIO {
@@ -42,7 +36,7 @@ public class IntakeIOSimulation implements IntakeIO {
     private final PIDController pivotController = new PIDController(0.0, 0.0, 0.0);
 
     private boolean pivotControllerNeedsReset = false;
-    private boolean pivotClosedLoop = true;
+    private boolean pivotClosedLoop = false;
     private static final Angle pivotStartAngle = Degrees.of(80);
 
     private boolean wasNotAuto = true;
@@ -112,8 +106,8 @@ public class IntakeIOSimulation implements IntakeIO {
 
         wasNotAuto = !DriverStation.isAutonomousEnabled();
 
-        rollerSimulation.update(0.02);
-        pivotSimulation.update(0.02);
+        rollerSimulation.update(GlobalConstants.kLoopPeriodSeconds);
+        pivotSimulation.update(GlobalConstants.kLoopPeriodSeconds);
 
         inputs.rollerMotorConnected = true;
         inputs.rollerPosition = rollerSimulation.getAngularPositionRad();
