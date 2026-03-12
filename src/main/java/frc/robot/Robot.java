@@ -23,6 +23,7 @@ import com.google.flatbuffers.Constants;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 
+import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.net.WebServer;
 import edu.wpi.first.wpilibj.Alert;
@@ -36,8 +37,10 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Watchdog;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.minolib.advantagekit.LocalADStarAK;
 import frc.minolib.advantagekit.LoggedTracer;
@@ -51,25 +54,25 @@ public class Robot extends LoggedRobot {
   private Command autonomousCommand;
   private final RobotContainer robotContainer;
 
-  private static final double loopOverrunWarningTimeout = 0.2;
-  private static final double canErrorTimeThreshold = 0.5; 
-  private static final double canivoreErrorTimeThreshold = 0.5;
-  private static final double lowBatteryVoltage = 11.8;
-  private static final double lowBatteryDisabledTime = 1.5;
-  private static final double lowBatteryMinCycleCount = 10;
-  private static int lowBatteryCycleCount = 0;
+  //private static final double loopOverrunWarningTimeout = 0.2;
+  //private static final double canErrorTimeThreshold = 0.5; 
+  //private static final double canivoreErrorTimeThreshold = 0.5;
+  //private static final double lowBatteryVoltage = 11.8;
+  //private static final double lowBatteryDisabledTime = 1.5;
+  //private static final double lowBatteryMinCycleCount = 10;
+  //private static int lowBatteryCycleCount = 0;
 
-  private final Timer canInitialErrorTimer = new Timer();
-  private final Timer canErrorTimer = new Timer();
-  private final Timer canivoreErrorTimer = new Timer();
-  private final Timer disabledTimer = new Timer();
-  private MinoCANBus canivoreBus;
+  //private final Timer canInitialErrorTimer = new Timer();
+  //private final Timer canErrorTimer = new Timer();
+  //private final Timer canivoreErrorTimer = new Timer();
+  //private final Timer disabledTimer = new Timer();
+  //private MinoCANBus canivoreBus;
 
-  private final Alert canErrorAlert = new Alert("CAN errors detected, robot may not be controllable.", AlertType.kError);
-  private final Alert canivoreErrorAlert = new Alert("CANivore errors detected, robot may not be controllable.", AlertType.kError);
-  private final Alert lowBatteryAlert = new Alert("Battery voltage is very low, consider turning off the robot or replacing the battery.", AlertType.kWarning);
-  private final Alert jitAlert = new Alert("Please wait to enable, JITing in progress.", AlertType.kWarning);
-  private final Alert noAutoSelectedAlert = new Alert("No auto selected: please select an auto", AlertType.kWarning);
+  //private final Alert canErrorAlert = new Alert("CAN errors detected, robot may not be controllable.", AlertType.kError);
+  //private final Alert canivoreErrorAlert = new Alert("CANivore errors detected, robot may not be controllable.", AlertType.kError);
+  //private final Alert lowBatteryAlert = new Alert("Battery voltage is very low, consider turning off the robot or replacing the battery.", AlertType.kWarning);
+  //private final Alert jitAlert = new Alert("Please wait to enable, JITing in progress.", AlertType.kWarning);
+  //private final Alert noAutoSelectedAlert = new Alert("No auto selected: please select an auto", AlertType.kWarning);
 
   public Robot() {
     Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
@@ -106,12 +109,10 @@ public class Robot extends LoggedRobot {
         break;
     }
 
-    SignalLogger.enableAutoLogging(true); // might disable later
-    Logger.registerURCL(URCL.startExternal()); // might disable later
-
+    SignalLogger.enableAutoLogging(false); // might disable later
     Logger.start();
-    WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
 
+    /*
     Pathfinding.setPathfinder(new LocalADStarAK());
 
     Map<String, Integer> commandCounts = new HashMap<>();
@@ -128,15 +129,9 @@ public class Robot extends LoggedRobot {
     CommandScheduler.getInstance().onCommandFinish((Command command) -> logCommandFunction.accept(command, false));
     CommandScheduler.getInstance().onCommandInterrupt((Command command) -> logCommandFunction.accept(command, false));
 
-    if (!GlobalConstants.kTuningMode) {
-      try {
-        Field watchdogField = IterativeRobotBase.class.getDeclaredField("m_watchdog");
-        watchdogField.setAccessible(true);
-        Watchdog watchdog = (Watchdog) watchdogField.get(this);
-        watchdog.setTimeout(0.2);
-      } catch (Exception e) {
-        DriverStation.reportWarning("Failed to disable loop overrun warnings", false);
-      }
+    if (GlobalConstants.getMode() == GlobalConstants.Mode.SIM) {
+      DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
+      DriverStationSim.notifyNewData();
     }
 
     // Reset alert timers
@@ -151,16 +146,20 @@ public class Robot extends LoggedRobot {
     robotContainer = new RobotContainer();
     canivoreBus = GlobalConstants.kCANivoreBus;
 
-    PathfindingCommand.warmupCommand().schedule();
+    CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
+    */
+
+    robotContainer = new RobotContainer();
   }
 
   @Override
   public void robotPeriodic() {
-    LoggedTracer.reset();
+    //LoggedTracer.reset();
 
     CommandScheduler.getInstance().run();
-    LoggedTracer.record("Commands");
+    //LoggedTracer.record("Commands");
 
+    /* 
     var canStatus = RobotController.getCANStatus();
     Logger.recordOutput("CANStatus/OffCount", canStatus.busOffCount);
     Logger.recordOutput("CANStatus/TxFullCount", canStatus.txFullCount);
@@ -186,7 +185,9 @@ public class Robot extends LoggedRobot {
     // JIT alert
     jitAlert.set(isJITing());
 
-    LoggedTracer.record("RobotPeriodic");
+    */
+
+    //LoggedTracer.record("RobotPeriodic");
   }
 
   @Override
