@@ -1,6 +1,5 @@
 package frc.robot.subsystems.intake;
 
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
@@ -9,8 +8,6 @@ import java.util.function.DoubleSupplier;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
-
-import com.google.flatbuffers.Constants;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
@@ -21,11 +18,13 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.minolib.advantagekit.LoggedTracer;
+
 import frc.minolib.advantagekit.LoggedTunableNumber;
 import frc.minolib.math.EqualsUtility;
+import frc.minolib.utilities.SubsystemDataProcessor;
 import frc.robot.Robot;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.IntakeConstants;
@@ -48,16 +47,20 @@ public class Intake extends SubsystemBase {
     private static final LoggedTunableNumber kHomingTimeoutSeconds = new LoggedTunableNumber("Intake/Pivot/HomingTimeSeconds", 0.4);
     private static final LoggedTunableNumber kHomingVelocityThreshold = new LoggedTunableNumber("Intake/Pivot/HomingVelocityThreshold", 0.1);
 
+    private static final LoggedTunableNumber kRollerIntakeVoltage = new LoggedTunableNumber("Intake/Roller/IntakeVoltage", 12);
+    private static final LoggedTunableNumber kRollerExhaustVoltage = new LoggedTunableNumber("Intake/Roller/ExhaustVoltage", -6);
+    private static final LoggedTunableNumber kRollerIdleVoltage = new LoggedTunableNumber("Intake/Roller/IdleVoltage", 1);
+
     @RequiredArgsConstructor
     public enum Goal {
-        DEPLOY(new LoggedTunableNumber("Intake/Pivot/DeployedDegrees", 5.0)),
-        PARKED(new LoggedTunableNumber("Intake/Pivot/ParkedDegrees", 100.0)),
+        DEPLOY(new LoggedTunableNumber("Intake/Pivot/DeployedDegrees", 180.0)),
+        PARKED(new LoggedTunableNumber("Intake/Pivot/ParkedDegrees", 20.0)),
         FEED(new LoggedTunableNumber("Intake/Pivot/FeedDegrees", 18)),
         CLIMB(new LoggedTunableNumber("Intake/Pivot/ClimbDegrees", 70.0));
 
         private final DoubleSupplier positionDegrees;
 
-        public double getAngleRad() {
+        public double getAngleRadians() {
             return Units.degreesToRadians(positionDegrees.getAsDouble());
         }
     }
@@ -65,18 +68,18 @@ public class Intake extends SubsystemBase {
     static {
         switch (GlobalConstants.getRobot()) {
             default -> {
-                kP.initDefault(1800);
-                kD.initDefault(100);
-                kS.initDefault(0);
-                kG.initDefault(20);
-                kA.initDefault(0);
+                kP.initDefault(IntakeConstants.pivotKp);
+                kD.initDefault(IntakeConstants.pivotKd);
+                kS.initDefault(IntakeConstants.pivotKs);
+                kG.initDefault(IntakeConstants.pivotKCos);
+                kA.initDefault(IntakeConstants.pivotKa);
             }
             case SIMBOT -> {
-                kP.initDefault(1000.0);
-                kD.initDefault(0);
-                kS.initDefault(0);
-                kG.initDefault(0);
-                kA.initDefault(0);
+                kP.initDefault(IntakeConstants.pivotSimulatedKp);
+                kD.initDefault(IntakeConstants.pivotSimulatedKd);
+                kS.initDefault(IntakeConstants.pivotSimulatedKs);
+                kG.initDefault(IntakeConstants.pivotSimulatedKCos);
+                kA.initDefault(IntakeConstants.pivotSimulatedKa);
             }
         }
     }
@@ -130,13 +133,21 @@ public class Intake extends SubsystemBase {
             )
         );
 
+        SubsystemDataProcessor.createAndStartSubsystemDataProcessor(() -> {
+            synchronized (inputs) {
+                io.updateInputs(inputs);
+            }
+        },
+        io);
+
         pivotHomingCommand = backupHomingSequence();
     }
 
     @Override
     public void periodic() {
-        io.updateInputs(inputs);
-        Logger.processInputs("Intake", inputs);
+        synchronized (inputs) {
+            Logger.processInputs("Intake", inputs);
+        }
 
         pivotMotorDisconnectedAlert.set(!pivotMotorConnectedDebouncer.calculate(inputs.pivotMotorConnected) && !Robot.isJITing());
         rollerMotorDisconnectedAlert.set(!rollerMotorConnectedDebouncer.calculate(inputs.rollerMotorConnected) && !Robot.isJITing());
@@ -159,7 +170,7 @@ public class Intake extends SubsystemBase {
 
         // Home on enable
         if (DriverStation.isEnabled() && !pivotHomed && !pivotHomingCommand.isScheduled()) {
-            pivotHomingCommand.schedule();
+            CommandScheduler.getInstance().schedule(pivotHomingCommand);
         }
 
         // Run profile
@@ -171,7 +182,7 @@ public class Intake extends SubsystemBase {
         Logger.recordOutput("Intake/Pivot/RunningProfile", shouldRunProfile);
 
         if (shouldRunProfile) {
-            var goalState = new State(MathUtil.clamp(goal.getAngleRad(), 0.0, kPivotMaximumAngle.get()), 0.0);
+            var goalState = new State(MathUtil.clamp(goal.getAngleRadians(), 0.0, kPivotMaximumAngle.get()), 0.0);
             double previousVelocity = setpoint.velocity;
             setpoint = profile.calculate(GlobalConstants.kLoopPeriodSeconds, setpoint, goalState);
 
@@ -206,8 +217,20 @@ public class Intake extends SubsystemBase {
         io.setRollerVoltage(rollerVoltage);
 
         // Log state
-        Logger.recordOutput("Intake/Pivot/MeasuredVelocityMetersPerSec", inputs.pivotVelocity);
-        LoggedTracer.record("Intake");
+        Logger.recordOutput("Intake/Pivot/MeasuredVelocityRadiansPerSecond", inputs.pivotVelocity);
+        Logger.recordOutput("Intake/Roller/AppliedVoltage", rollerVoltage);
+    }
+
+    public void setRollerIntaking() {
+        rollerVoltage = kRollerIntakeVoltage.get();
+    }
+
+    public void setRollerExhausting() {
+        rollerVoltage = kRollerExhaustVoltage.get();
+    }
+
+    public void setRollerIdling() {
+        rollerVoltage = kRollerIdleVoltage.get();
     }
 
     public void setGoal(Goal goal) {

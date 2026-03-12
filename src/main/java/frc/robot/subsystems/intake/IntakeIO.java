@@ -2,7 +2,9 @@ package frc.robot.subsystems.intake;
 
 import org.littletonrobotics.junction.AutoLog;
 
-public interface IntakeIO {
+import frc.minolib.utilities.SubsystemDataProcessor;
+
+public interface IntakeIO extends SubsystemDataProcessor.IODataRefresher {
     @AutoLog
     public class IntakeIOInputs {
         public boolean rollerMotorConnected = true;
@@ -45,4 +47,7 @@ public interface IntakeIO {
     public default void setPivotPID(double kP, double kI, double kD) {}
 
     public default void setBrakeMode(boolean enabled) {}
+
+    @Override
+    public void refreshData(); 
 }
