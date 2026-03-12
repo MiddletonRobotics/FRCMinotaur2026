@@ -30,30 +30,30 @@ public class IntakeConstants {
 
     public static final AngularVelocity kRollerIdleThreshold = RadiansPerSecond.of(0.5);
 
-    public static final Angle kIntakeMinimumPosition = Degrees.of(-10);
-    public static final Angle kIntakeMaximumPosition = Degrees.of(150);
-    public static final Angle kIntakeStartingPosition = Degrees.of(150);
+    public static final Angle kIntakeMinimumPosition = Degrees.of(45);
+    public static final Angle kIntakeMaximumPosition = Degrees.of(170);
+    public static final Angle kIntakeStartingPosition = Degrees.of(45);
 
     public static final Mass kIntakeMass = Kilograms.of(20.0);
     public static final Distance kIntakeLength = Inches.of(12.0);
     public static final MomentOfInertia kRollerMOI = MomentOfInertia.ofBaseUnits(0.02, KilogramSquareMeters);
     public static final MomentOfInertia kPivotMOI = MomentOfInertia.ofBaseUnits(0.02, KilogramSquareMeters);
 
-    public static final double pivotKp = 0.0;
+    public static final double pivotKp = 0.01;
     public static final double pivotKd = 0.0;
     public static final double pivotKs = 0.0;
     public static final double pivotKv = 0.0;
     public static final double pivotKCos = 0.0;
     public static final double pivotKa = 0.0;
-    public static final double pivotSimulatedKp = 0.0;
-    public static final double pivotSimulatedKd = 0.0;
+    public static final double pivotSimulatedKp = 10.0;
+    public static final double pivotSimulatedKd = 0.01;
     public static final double pivotSimulatedKs = 0.0;
     public static final double pivotSimulatedKv = 0.0;
     public static final double pivotSimulatedKCos = 0.0;
     public static final double pivotSimulatedKa = 0.0;
 
     public static final boolean kPivotMotorInverted = false;
-    public static final double kPivotMotorReduction = 1;
+    public static final double kPivotMotorReduction = (25.0 / 1) * (32.0 / 16.0);
     public static final Current kPivotMotorSupplyLimit = Amps.of(30);
     public static final DCMotor kPivotSimulatedGearbox = DCMotor.getNEO(1);
 
