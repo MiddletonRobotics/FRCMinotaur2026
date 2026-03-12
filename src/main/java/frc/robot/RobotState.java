@@ -1,6 +1,5 @@
 package frc.robot;
 
-import java.lang.StackWalker.Option;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -11,14 +10,11 @@ import java.util.function.IntSupplier;
 
 import org.littletonrobotics.junction.Logger;
 
-import com.ctre.phoenix6.sim.ChassisReference;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import frc.minolib.localization.WeightedPoseEstimate;
 import frc.minolib.math.ConcurrentTimeInterpolatableBuffer;
 import frc.robot.constants.GlobalConstants;
