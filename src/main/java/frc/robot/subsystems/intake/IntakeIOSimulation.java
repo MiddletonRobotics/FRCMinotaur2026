@@ -11,6 +11,8 @@ import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 
+import com.google.flatbuffers.Constants;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -34,12 +36,8 @@ public class IntakeIOSimulation implements IntakeIO {
     private double pivotAppliedVoltage = 0.0;
 
     private final PIDController pivotController = new PIDController(0.0, 0.0, 0.0);
-
-    private boolean pivotControllerNeedsReset = false;
     private boolean pivotClosedLoop = false;
-    private static final Angle pivotStartAngle = Degrees.of(80);
-
-    private boolean wasNotAuto = true;
+    private boolean pivotControllerNeedsReset = false;
 
     private final LoggedMechanism2d mechanism = new LoggedMechanism2d(
         IntakeConstants.kIntakeLength.in(Meters) * 3,
@@ -99,13 +97,6 @@ public class IntakeIOSimulation implements IntakeIO {
             pivotControllerNeedsReset = true;
         }
 
-        if (wasNotAuto && DriverStation.isAutonomousEnabled()) {
-            pivotSimulation.setState(pivotStartAngle.in(Radians), 0.0);
-            wasNotAuto = false;
-        }
-
-        wasNotAuto = !DriverStation.isAutonomousEnabled();
-
         rollerSimulation.update(GlobalConstants.kLoopPeriodSeconds);
         pivotSimulation.update(GlobalConstants.kLoopPeriodSeconds);
 
@@ -126,8 +117,9 @@ public class IntakeIOSimulation implements IntakeIO {
         inputs.pivotSupplyCurrentAmperes = pivotSimulation.getCurrentDrawAmps();
         inputs.pivotMotorTempuratureCelcius = 0.0; 
 
-        pivotLigament.setAngle(Math.toDegrees(pivotSimulation.getAngleRads()));
         Logger.recordOutput("Intake/Mechanism2d", mechanism);
+
+        pivotLigament.setAngle(Math.toDegrees(pivotSimulation.getAngleRads()));
         
         updateRollerColor();
     }
@@ -155,12 +147,11 @@ public class IntakeIOSimulation implements IntakeIO {
 
     @Override
     public void setPivotPosition(double position, double feedforward) {
-        if(!pivotClosedLoop) {
+        if (!pivotClosedLoop) {
             pivotControllerNeedsReset = true;
             pivotClosedLoop = true;
         }
-
-        if(pivotControllerNeedsReset) {
+        if (pivotControllerNeedsReset) {
             pivotController.reset();
             pivotControllerNeedsReset = false;
         }
@@ -188,5 +179,10 @@ public class IntakeIOSimulation implements IntakeIO {
         } else {
             rollerLigament.setColor(new Color8Bit(Color.kRed));
         }
+    }
+
+    @Override
+    public void refreshData() {
+    
     }
 }
