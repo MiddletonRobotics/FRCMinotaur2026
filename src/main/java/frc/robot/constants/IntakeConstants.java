@@ -7,6 +7,7 @@ import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Rotations;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
@@ -34,6 +35,8 @@ public class IntakeConstants {
     public static final Angle kIntakeMaximumPosition = Degrees.of(170);
     public static final Angle kIntakeStartingPosition = Degrees.of(45);
 
+    public static final Angle kPivotAbsoluteEncoderOffset = Rotations.of(0);
+
     public static final Mass kIntakeMass = Kilograms.of(20.0);
     public static final Distance kIntakeLength = Inches.of(12.0);
     public static final MomentOfInertia kRollerMOI = MomentOfInertia.ofBaseUnits(0.02, KilogramSquareMeters);
@@ -56,6 +59,9 @@ public class IntakeConstants {
     public static final double kPivotMotorReduction = (25.0 / 1) * (32.0 / 16.0);
     public static final Current kPivotMotorSupplyLimit = Amps.of(30);
     public static final DCMotor kPivotSimulatedGearbox = DCMotor.getNEO(1);
+
+    public static final double kPivotMotorPositionConversionFactor = (1 / kPivotMotorReduction) * 2 * Math.PI;
+    public static final double kPivotMotorVelocityConversionFactor = 1 / kPivotMotorPositionConversionFactor;
 
     public static final double rollerKp = 0.0;
     public static final double rollerKd = 0.0;
