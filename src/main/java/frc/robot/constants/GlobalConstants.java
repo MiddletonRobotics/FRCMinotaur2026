@@ -22,8 +22,8 @@ public class GlobalConstants {
     public static final MinoCANBus kRioBus = new MinoCANBus("rio");
 
     public static final double kLoopPeriodSeconds = 0.02;
-    private static RobotType kRobotType = RobotType.COMPBOT;
-    public static final boolean kTuningMode = false;
+    private static RobotType kRobotType = RobotType.SIMBOT;
+    public static final boolean kTuningMode = true;
 
     @SuppressWarnings("resource")
     public static RobotType getRobot() {
@@ -42,13 +42,8 @@ public class GlobalConstants {
     }
 
     public enum Mode {
-        /** Running on a real robot. */
         REAL,
-
-        /** Running a physics simulator. */
         SIM,
-
-        /** Replaying from a log file. */
         REPLAY
     }
 
