@@ -21,7 +21,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
+import frc.minolib.advantagekit.LoggedTracer;
 import frc.minolib.advantagekit.LoggedTunableNumber;
 import frc.minolib.math.EqualsUtility;
 import frc.minolib.utilities.SubsystemDataProcessor;
@@ -30,7 +30,6 @@ import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.IntakeConstants;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.experimental.Accessors;
 
 public class Intake extends SubsystemBase {
@@ -47,21 +46,31 @@ public class Intake extends SubsystemBase {
     private static final LoggedTunableNumber kHomingTimeoutSeconds = new LoggedTunableNumber("Intake/Pivot/HomingTimeSeconds", 0.4);
     private static final LoggedTunableNumber kHomingVelocityThreshold = new LoggedTunableNumber("Intake/Pivot/HomingVelocityThreshold", 0.1);
 
-    private static final LoggedTunableNumber kRollerIntakeVoltage = new LoggedTunableNumber("Intake/Roller/IntakeVoltage", 12);
-    private static final LoggedTunableNumber kRollerExhaustVoltage = new LoggedTunableNumber("Intake/Roller/ExhaustVoltage", -6);
-    private static final LoggedTunableNumber kRollerIdleVoltage = new LoggedTunableNumber("Intake/Roller/IdleVoltage", 1);
-
     @RequiredArgsConstructor
-    public enum Goal {
+    public enum PivotGoal {
         DEPLOY(new LoggedTunableNumber("Intake/Pivot/DeployedDegrees", 180.0)),
         PARKED(new LoggedTunableNumber("Intake/Pivot/ParkedDegrees", 20.0)),
-        FEED(new LoggedTunableNumber("Intake/Pivot/FeedDegrees", 18)),
+        FEED(new LoggedTunableNumber("Intake/Pivot/FeedDegrees", 90.0)),
         CLIMB(new LoggedTunableNumber("Intake/Pivot/ClimbDegrees", 70.0));
 
         private final DoubleSupplier positionDegrees;
 
         public double getAngleRadians() {
             return Units.degreesToRadians(positionDegrees.getAsDouble());
+        }
+    }
+
+    @RequiredArgsConstructor
+    public enum RollerGoal {
+        INTAKE(new LoggedTunableNumber("Intake/Roller/IntakeVoltage", 12.0)),
+        EXHAUST(new LoggedTunableNumber("Intake/Roller/ExhaustVoltage", -6.0)),
+        IDLE(new LoggedTunableNumber("Intake/Roller/IdleVoltage", 2.0)),
+        STOP(new LoggedTunableNumber("Intake/Roller/StopVoltage", 0.0));
+
+        private final DoubleSupplier rollerVoltage;
+
+        public double getRollerVoltage() {
+            return rollerVoltage.getAsDouble();
         }
     }
 
@@ -98,7 +107,7 @@ public class Intake extends SubsystemBase {
 
     private TrapezoidProfile profile;
     @Getter private State setpoint = new State();
-    @Getter private Goal goal = Goal.PARKED;
+    @Getter private PivotGoal goal = PivotGoal.PARKED;
     private boolean stopProfile = false;
 
     @AutoLogOutput(key = "Intake/Pivot/HomedPositionRadians")
@@ -108,7 +117,8 @@ public class Intake extends SubsystemBase {
     @Getter
     private boolean pivotHomed = false;
 
-    @Setter 
+    @Getter 
+    private RollerGoal rollerGoal = RollerGoal.IDLE;
     private double rollerVoltage = 0.0;
 
     private Debouncer pivotHomingDebouncer = new Debouncer(kHomingTimeoutSeconds.get());
@@ -214,29 +224,30 @@ public class Intake extends SubsystemBase {
             Logger.recordOutput("Intake/Pivot/Profile/GoalVelocityRadiansPerSecond", 0.0);
         }
 
+        switch (rollerGoal) {
+            case INTAKE -> rollerVoltage = rollerGoal.getRollerVoltage();
+            case EXHAUST -> rollerVoltage = rollerGoal.getRollerVoltage();
+            case IDLE -> rollerVoltage = rollerGoal.getRollerVoltage();
+            case STOP -> rollerVoltage = 0.0;
+        }
+        
         io.setRollerVoltage(rollerVoltage);
 
-        // Log state
         Logger.recordOutput("Intake/Pivot/MeasuredVelocityRadiansPerSecond", inputs.pivotVelocity);
         Logger.recordOutput("Intake/Roller/AppliedVoltage", rollerVoltage);
+
+        LoggedTracer.record("IntakePeriodicMS");
     }
 
-    public void setRollerIntaking() {
-        rollerVoltage = kRollerIntakeVoltage.get();
-    }
-
-    public void setRollerExhausting() {
-        rollerVoltage = kRollerExhaustVoltage.get();
-    }
-
-    public void setRollerIdling() {
-        rollerVoltage = kRollerIdleVoltage.get();
-    }
-
-    public void setGoal(Goal goal) {
+    public void setPivotGoal(PivotGoal goal) {
         if (goal == this.goal) return;
         this.goal = goal;
         pivotAtGoal = false;
+    }
+
+    public void setRollerGoal(RollerGoal goal) {
+        if(goal == this.rollerGoal) return;
+        this.rollerGoal = goal;
     }
 
     public void setBrakeMode(boolean enabled) {
@@ -248,6 +259,10 @@ public class Intake extends SubsystemBase {
     public void setHome() {
         pivotHomedPosition = inputs.pivotPosition;
         pivotHomed = true;
+    }
+
+    private Command setPivotGoalCommand(PivotGoal goal) {
+        return Commands.runOnce(() -> setPivotGoal(goal));
     }
 
     private Command backupHomingSequence() {
@@ -266,6 +281,10 @@ public class Intake extends SubsystemBase {
         });
     }
 
+    public Command prepareToClimb() {
+        return setPivotGoalCommand(PivotGoal.CLIMB);
+    }
+
     public void overrideHoming() {
         pivotHomed = false;
     }
@@ -281,9 +300,5 @@ public class Intake extends SubsystemBase {
 
     public double getRollerVelocity() {
         return inputs.rollerVelocity;
-    }
-
-    public void stopRoller() {
-        rollerVoltage = 0.0;
     }
 }
