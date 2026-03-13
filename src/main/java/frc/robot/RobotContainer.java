@@ -102,12 +102,8 @@ public class RobotContainer {
       true
     ));
 
-    driverController.a().onTrue(IntakeFactory.deployGroundIntakeNonBlocking(this));
-    driverController.b().onTrue(IntakeFactory.parkGroundIntakeNonBlocking(this));
-
-    driverController.x().onTrue(IntakeFactory.runRollersIntakingNonBlocking(this));
-    driverController.y().onTrue(IntakeFactory.runRollersExhaustingNonBlocking(this));
-    driverController.y().and(driverController.x()).whileFalse(IntakeFactory.stopRollers(this));
+    driverController.a().onTrue(IntakeFactory.prepareIntakeBlocking(this));
+    driverController.b().onTrue(IntakeFactory.parkIntakeBlocking(this));
   }
 
   public Command getAutonomousCommand() {

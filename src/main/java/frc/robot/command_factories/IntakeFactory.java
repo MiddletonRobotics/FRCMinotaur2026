@@ -4,30 +4,28 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
 import frc.robot.RobotContainer;
-import frc.robot.subsystems.intake.Intake.Goal;
+import frc.robot.subsystems.intake.Intake.PivotGoal;
+import frc.robot.subsystems.intake.Intake.RollerGoal;
 
 public class IntakeFactory {
-    public static Command deployGroundIntakeNonBlocking(RobotContainer robotContainer) {
-        return Commands.run(() -> 
-            robotContainer.getIntake().setGoal(Goal.DEPLOY), robotContainer.getIntake()
-        ).until(robotContainer.getIntake()::pivotAtGoal);
+    public static Command prepareIntakeBlocking(RobotContainer robotContainer) {
+        return Commands.parallel(
+            Commands.runOnce(() -> robotContainer.getIntake().setPivotGoal(PivotGoal.DEPLOY)),
+            Commands.waitUntil(robotContainer.getIntake()::pivotAtGoal)
+                .andThen(Commands.startEnd(
+                    () -> robotContainer.getIntake().setRollerGoal(RollerGoal.INTAKE),
+                    () -> robotContainer.getIntake().setRollerGoal(RollerGoal.STOP)
+                ))
+        );
     }
 
-    public static Command parkGroundIntakeNonBlocking(RobotContainer robotContainer) {
-        return Commands.run(() -> 
-            robotContainer.getIntake().setGoal(Goal.PARKED), robotContainer.getIntake()
-        ).until(robotContainer.getIntake()::pivotAtGoal);
-    }
-
-    public static Command runRollersIntakingNonBlocking(RobotContainer robotContainer) {
-        return Commands.runOnce(() -> robotContainer.getIntake().setRollerVoltage(12), robotContainer.getIntake());
-    }
-
-    public static Command runRollersExhaustingNonBlocking(RobotContainer robotContainer) {
-        return Commands.runOnce(() -> robotContainer.getIntake().setRollerVoltage(-12), robotContainer.getIntake());
-    }
-
-    public static Command stopRollers(RobotContainer robotContainer) {
-        return Commands.runOnce(() -> robotContainer.getIntake().stopRoller(), robotContainer.getIntake());
+    public static Command parkIntakeBlocking(RobotContainer robotContainer) {
+        return Commands.parallel(
+            Commands.runOnce(() -> robotContainer.getIntake().setPivotGoal(PivotGoal.PARKED))
+                .alongWith(Commands.runOnce(
+                    () -> robotContainer.getIntake().setRollerGoal(RollerGoal.IDLE)
+                )),
+            Commands.waitUntil(robotContainer.getIntake()::pivotAtGoal)
+        );
     }
 }
