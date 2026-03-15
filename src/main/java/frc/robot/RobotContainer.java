@@ -10,6 +10,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -31,6 +32,8 @@ import frc.robot.subsystems.drivetrain.SimulationTunerConstants;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIOHardware;
 import frc.robot.subsystems.intake.IntakeIOSimulation;
+import frc.robot.subsystems.intake.Intake.PivotGoal;
+import frc.robot.subsystems.intake.Intake.RollerGoal;
 
 public class RobotContainer {
   private final Consumer<WeightedPoseEstimate> visionEstimateConsumer = new Consumer<WeightedPoseEstimate>() {
@@ -44,8 +47,8 @@ public class RobotContainer {
   private Drivetrain drivetrain;
   private Intake intake;
 
-  private CommandXboxController driverController = new CommandXboxController(ControllerConstants.kDriverControllerPort);
-  private CommandXboxController operatorController = new CommandXboxController(ControllerConstants.kOperatorControllerPort);
+  private CommandSimulatedXboxController driverController = new CommandSimulatedXboxController(ControllerConstants.kDriverControllerPort);
+  private CommandSimulatedXboxController operatorController = new CommandSimulatedXboxController(ControllerConstants.kOperatorControllerPort);
 
   private final LoggedDashboardChooser<Command> autoRegistry;
 
@@ -89,6 +92,8 @@ public class RobotContainer {
     drivetrain = buildDrivetrain();
     intake = buildIntake();
 
+    intake.setBrakeMode(driverController.back().and(() -> !DriverStation.isEnabled()));
+
     autoRegistry = new LoggedDashboardChooser<Command>("Auton Choices", AutoBuilder.buildAutoChooser());
     autoRegistry.addOption("Drivetrain Translation Dynamic Forward", drivetrain.sysIdDynamic(Drivetrain.SysIdMechanism.SWERVE_TRANSLATION, Direction.kForward));
     autoRegistry.addOption("Drivetrain Translation Dynamic Reverse", drivetrain.sysIdDynamic(Drivetrain.SysIdMechanism.SWERVE_TRANSLATION, Direction.kReverse));
@@ -108,8 +113,23 @@ public class RobotContainer {
       true
     ));
 
-    driverController.a().onTrue(IntakeFactory.prepareIntakeBlocking(this));
-    driverController.b().onTrue(IntakeFactory.parkIntakeBlocking(this));
+    driverController
+      .leftTrigger()
+      .onTrue(Commands.runOnce(() -> intake.setPivotGoal(PivotGoal.DEPLOY)))
+      .whileTrue(Commands.runEnd(
+        () -> intake.setRollerGoal(RollerGoal.INTAKE), 
+        () -> intake.setRollerGoal(RollerGoal.STOP), 
+        intake
+      ));
+
+    driverController
+      .leftBumper()
+      .onTrue(Commands.runOnce(() -> intake.setPivotGoal(PivotGoal.PARKED)))
+      .onTrue(Commands.runEnd(
+        () -> intake.setRollerGoal(RollerGoal.INTAKE), 
+        () -> intake.setRollerGoal(RollerGoal.IDLE), 
+        intake
+      ).withTimeout(1));
   }
 
   public Command getAutonomousCommand() {
