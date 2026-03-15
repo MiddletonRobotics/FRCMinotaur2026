@@ -45,7 +45,7 @@ public class RobotContainer {
 
   private final RobotState robotState = new RobotState(visionEstimateConsumer);
   private Drivetrain drivetrain;
-  private Intake intake;
+  //private Intake intake;
 
   private CommandSimulatedXboxController driverController = new CommandSimulatedXboxController(ControllerConstants.kDriverControllerPort);
   private CommandSimulatedXboxController operatorController = new CommandSimulatedXboxController(ControllerConstants.kOperatorControllerPort);
@@ -66,33 +66,33 @@ public class RobotContainer {
     }
   }
 
-  private Intake buildIntake() {
-    if(Robot.isSimulation()) {
-      return new Intake(
-        new IntakeIOSimulation()
+  //private Intake buildIntake() {
+  //  if(Robot.isSimulation()) {
+  //    return new Intake(
+  //      new IntakeIOSimulation()
         //robotState
-      );
-    } else {
-      return new Intake(
-        new IntakeIOHardware(IntakeConstants.kRollerMotor, IntakeConstants.kPivotMotor, IntakeConstants.kPivotAbsoluteEncoder)
+  //    );
+  //  } else {
+  //    return new Intake(
+  //      new IntakeIOHardware(IntakeConstants.kRollerMotor, IntakeConstants.kPivotMotor, IntakeConstants.kPivotAbsoluteEncoder)
         //robotState
-      );
-    }
-  }
+  //    );
+  //  }
+  //}
 
   public Drivetrain getDrivetrain() {
     return drivetrain;
   }
 
-  public Intake getIntake() {
-    return intake;
-  }
+  //public Intake getIntake() {
+  //  return intake;
+  //}
 
   public RobotContainer() {
     drivetrain = buildDrivetrain();
-    intake = buildIntake();
+    //intake = buildIntake();
 
-    intake.setBrakeMode(driverController.back().and(() -> !DriverStation.isEnabled()));
+    //.setBrakeMode(driverController.back().and(() -> !DriverStation.isEnabled()));
 
     autoRegistry = new LoggedDashboardChooser<Command>("Auton Choices", AutoBuilder.buildAutoChooser());
     autoRegistry.addOption("Drivetrain Translation Dynamic Forward", drivetrain.sysIdDynamic(Drivetrain.SysIdMechanism.SWERVE_TRANSLATION, Direction.kForward));
@@ -113,23 +113,23 @@ public class RobotContainer {
       true
     ));
 
-    driverController
-      .leftTrigger()
-      .onTrue(Commands.runOnce(() -> intake.setPivotGoal(PivotGoal.DEPLOY)))
-      .whileTrue(Commands.runEnd(
-        () -> intake.setRollerGoal(RollerGoal.INTAKE), 
-        () -> intake.setRollerGoal(RollerGoal.STOP), 
-        intake
-      ));
+  //   driverController
+  //     .leftTrigger()
+  //     .onTrue(Commands.runOnce(() -> intake.setPivotGoal(PivotGoal.DEPLOY)))
+  //     .whileTrue(Commands.runEnd(
+  //       () -> intake.setRollerGoal(RollerGoal.INTAKE), 
+  //       () -> intake.setRollerGoal(RollerGoal.STOP), 
+  //       intake
+  //     ));
 
-    driverController
-      .leftBumper()
-      .onTrue(Commands.runOnce(() -> intake.setPivotGoal(PivotGoal.PARKED)))
-      .onTrue(Commands.runEnd(
-        () -> intake.setRollerGoal(RollerGoal.INTAKE), 
-        () -> intake.setRollerGoal(RollerGoal.IDLE), 
-        intake
-      ).withTimeout(1));
+  //   driverController
+  //     .leftBumper()
+  //     .onTrue(Commands.runOnce(() -> intake.setPivotGoal(PivotGoal.PARKED)))
+  //     .onTrue(Commands.runEnd(
+  //       () -> intake.setRollerGoal(RollerGoal.INTAKE), 
+  //       () -> intake.setRollerGoal(RollerGoal.IDLE), 
+  //       intake
+  //     ).withTimeout(1));
   }
 
   public Command getAutonomousCommand() {
