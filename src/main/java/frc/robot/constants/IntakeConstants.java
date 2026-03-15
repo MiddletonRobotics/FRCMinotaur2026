@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Kilograms;
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
@@ -29,17 +30,18 @@ public class IntakeConstants {
     public static final MinoCANDevice kRollerMotor = new MinoCANDevice(15, GlobalConstants.kCANivoreBus);
     public static final MinoCANDevice kPivotAbsoluteEncoder = new MinoCANDevice(16, GlobalConstants.kRioBus);
 
-    public static final AngularVelocity kRollerIdleThreshold = RadiansPerSecond.of(0.5);
+    public static final AngularVelocity kRollerIdleThreshold = RadiansPerSecond.of(150);
+    public static final AngularVelocity kRollerStopThreshold = RadiansPerSecond.of(0.5);
 
-    public static final Angle kIntakeMinimumPosition = Degrees.of(45);
-    public static final Angle kIntakeMaximumPosition = Degrees.of(170);
-    public static final Angle kIntakeStartingPosition = Degrees.of(45);
+    public static final Angle kIntakeMinimumPosition = Radians.of(1.040216); //59.6 degrees
+    public static final Angle kIntakeMaximumPosition = Radians.of(3.270747); //187.4 degrees
+    public static final Angle kIntakeStartingPosition = Radians.of(1.040216);
 
     public static final Angle kPivotAbsoluteEncoderOffset = Rotations.of(0);
 
-    public static final Mass kIntakeMass = Kilograms.of(20.0);
-    public static final Distance kIntakeLength = Inches.of(12.0);
-    public static final MomentOfInertia kRollerMOI = MomentOfInertia.ofBaseUnits(0.02, KilogramSquareMeters);
+    public static final Mass kIntakeMass = Kilograms.of(5.89);
+    public static final Distance kIntakeLength = Inches.of(14.0);
+    public static final MomentOfInertia kRollerMOI = MomentOfInertia.ofBaseUnits(0.0009, KilogramSquareMeters);
     public static final MomentOfInertia kPivotMOI = MomentOfInertia.ofBaseUnits(0.02, KilogramSquareMeters);
 
     public static final double pivotKp = 0.01;
@@ -77,7 +79,7 @@ public class IntakeConstants {
     public static final boolean kRollerMotorInverted = false;
     public static final double kRollerMotorReduction = 1;
     public static final Current kRollerMotorSupplyLimit = Amps.of(50);
-    public static final DCMotor kRollerSimulatedGearbox = DCMotor.getFalcon500Foc(1);
+    public static final DCMotor kRollerSimulatedGearbox = DCMotor.getFalcon500(1);
 
     public static final double kRollerVelocityFilterTimeConstant = 0.1;
 }
