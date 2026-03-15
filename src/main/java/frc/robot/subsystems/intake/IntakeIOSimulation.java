@@ -51,9 +51,9 @@ public class IntakeIOSimulation implements IntakeIO {
         new LoggedMechanismLigament2d(
             "Arm",
             IntakeConstants.kIntakeLength.in(Meters),
-            Math.toDegrees(IntakeConstants.kIntakeStartingPosition.in(Radians)),
+            IntakeConstants.kIntakeMinimumPosition.in(Degrees),
             4,
-            new Color8Bit(Color.kOrange)
+            new Color8Bit(Color.kMaroon)
         )
     );
 
@@ -84,7 +84,7 @@ public class IntakeIOSimulation implements IntakeIO {
             IntakeConstants.kPivotMotorReduction,
             IntakeConstants.kPivotMOI.in(KilogramSquareMeters),
             IntakeConstants.kIntakeLength.in(Meters),
-            IntakeConstants.kIntakeMinimumPosition.in(Radians),
+            IntakeConstants.kIntakeMinimumPosition.in(Radians) - 2,
             IntakeConstants.kIntakeMaximumPosition.in(Radians),
             true, 
             IntakeConstants.kIntakeStartingPosition.in(Radians)
@@ -96,9 +96,6 @@ public class IntakeIOSimulation implements IntakeIO {
         if (DriverStation.isDisabled()) {
             pivotControllerNeedsReset = true;
         }
-
-        rollerSimulation.update(GlobalConstants.kLoopPeriodSeconds);
-        pivotSimulation.update(GlobalConstants.kLoopPeriodSeconds);
 
         inputs.rollerMotorConnected = true;
         inputs.rollerPosition = rollerSimulation.getAngularPositionRad();
@@ -172,8 +169,10 @@ public class IntakeIOSimulation implements IntakeIO {
     private void updateRollerColor() {
         double velocity = rollerSimulation.getAngularVelocityRadPerSec();
 
-        if (Math.abs(velocity) < IntakeConstants.kRollerIdleThreshold.in(RadiansPerSecond)) {
-            rollerLigament.setColor(new Color8Bit(Color.kYellow));
+        if (Math.abs(velocity) < IntakeConstants.kRollerIdleThreshold.in(RadiansPerSecond) && Math.abs(velocity) > IntakeConstants.kRollerStopThreshold.in(RadiansPerSecond)) {
+            rollerLigament.setColor(new Color8Bit(Color.kOrange));
+        } else if (Math.abs(velocity) < IntakeConstants.kRollerStopThreshold.in(RadiansPerSecond)) {
+            rollerLigament.setColor(new Color8Bit(Color.kOrange));
         } else if (velocity > 0) {
             rollerLigament.setColor(new Color8Bit(Color.kGreen));
         } else {
@@ -183,6 +182,7 @@ public class IntakeIOSimulation implements IntakeIO {
 
     @Override
     public void refreshData() {
-    
+        rollerSimulation.update(GlobalConstants.kLoopPeriodSeconds);
+        pivotSimulation.update(GlobalConstants.kLoopPeriodSeconds);
     }
 }

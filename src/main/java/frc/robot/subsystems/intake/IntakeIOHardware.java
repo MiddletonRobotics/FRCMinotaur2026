@@ -85,7 +85,7 @@ public class IntakeIOHardware implements IntakeIO {
 
         rollerMotorConfiguration = new TalonFXConfiguration();
         rollerMotorConfiguration.MotorOutput.Inverted = IntakeConstants.kRollerMotorInverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
-        rollerMotorConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+        rollerMotorConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         rollerMotorConfiguration.CurrentLimits.SupplyCurrentLimitEnable = true;
         rollerMotorConfiguration.CurrentLimits.SupplyCurrentLimit = IntakeConstants.kRollerMotorSupplyLimit.in(Amps);
         rollerMotorConfiguration.Feedback.VelocityFilterTimeConstant = IntakeConstants.kRollerVelocityFilterTimeConstant;
@@ -109,7 +109,7 @@ public class IntakeIOHardware implements IntakeIO {
 
         pivotMotorConfiguration = new SparkMaxConfig()
             .inverted(IntakeConstants.kPivotMotorInverted)
-            .idleMode(IdleMode.kCoast)
+            .idleMode(IdleMode.kBrake)
             .smartCurrentLimit((int) IntakeConstants.kPivotMotorSupplyLimit.in(Amps), 50)
             .voltageCompensation(12.0);
 
@@ -134,7 +134,6 @@ public class IntakeIOHardware implements IntakeIO {
             .d(0);
 
         tryUntilOk(pivotMotor, 5, () -> pivotMotor.configure(pivotMotorConfiguration, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
-        tryUntilOk(pivotMotor, 5, () -> pivotEncoder.setPosition(0.0));
 
         rollerPosition = rollerMotor.getPosition();
         rollerVelocity = rollerMotor.getVelocity();
@@ -157,6 +156,7 @@ public class IntakeIOHardware implements IntakeIO {
             rollerTemperature,
             absoluteEncoderPosition
         ));
+        tryUntilOk(pivotMotor, 5, () -> pivotEncoder.setPosition(absoluteEncoderPosition.getValue().in(Radians)));
     }
 
     @Override
