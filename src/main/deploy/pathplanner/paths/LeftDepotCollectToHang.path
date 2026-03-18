@@ -3,37 +3,32 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.0,
-        "y": 6.0
+        "x": 0.5889900662251655,
+        "y": 7.105951986754967
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.0,
-        "y": 5.75
+        "x": 2.3241142384105955,
+        "y": 6.648576158940398
       },
       "isLocked": false,
-      "linkedName": "T1"
+      "linkedName": "LeftDepotCollectionPose"
     },
     {
       "anchor": {
-        "x": 2.0,
-        "y": 6.0
+        "x": 1.5763410596026488,
+        "y": 3.701043046357616
       },
       "prevControl": {
-        "x": 2.0,
-        "y": 5.75
+        "x": 2.164155629139073,
+        "y": 3.7311258278145694
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "LeftHangPosition"
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 0.5,
-      "rotationDegrees": 0.0
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
@@ -43,17 +38,17 @@
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
-    "unlimited": true
+    "unlimited": false
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 180.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "Left",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": -36.5
   },
   "useDefaultConstraints": true
 }
