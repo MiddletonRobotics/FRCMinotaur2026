@@ -105,8 +105,7 @@ public class Intake extends SubsystemBase {
     private final Alert rollerMotorDisconnectedAlert = new Alert("Intake roller motor disconnected!", AlertType.kError);
 
     @AutoLogOutput(key = "Intake/BrakeModeEnabled")
-    private BooleanSupplier brakeModeEnabled = () -> false;
-    private boolean lastBrakeModeEnabled = true;
+    private BooleanSupplier brakeModeEnabled = () -> true;
 
     private TrapezoidProfile profile;
     @Getter private State setpoint = new State();
@@ -118,7 +117,7 @@ public class Intake extends SubsystemBase {
 
     @AutoLogOutput(key = "Intake/Pivot/Homed")
     @Getter
-    private boolean pivotHomed = false;
+    private boolean pivotHomed = true;
 
     @Getter 
     private RollerGoal rollerGoal = RollerGoal.STOP;
@@ -280,7 +279,7 @@ public class Intake extends SubsystemBase {
             pivotHomed = pivotHomingDebouncer.calculate(Math.abs(inputs.pivotVelocity) <= kHomingVelocityThreshold.get() && Math.abs(inputs.pivotAppliedVoltage) >= kHomingVolts.get() * 0.7);
         }).until(() -> pivotHomed).andThen(this::setHome).finallyDo(() -> {
             stopProfile = false;
-        });
+        }).withName("Intake Homing Sequence");
     }
 
     public Command prepareToClimb() {
