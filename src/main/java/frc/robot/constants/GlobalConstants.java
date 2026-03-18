@@ -1,11 +1,9 @@
 package frc.robot.constants;
 
-import static edu.wpi.first.units.Units.Seconds;
-
-import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.RobotBase;
+
 import frc.minolib.hardware.MinoCANBus;
 
 public class GlobalConstants {

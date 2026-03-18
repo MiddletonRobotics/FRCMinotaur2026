@@ -44,7 +44,7 @@ public class IntakeConstants {
     public static final MomentOfInertia kRollerMOI = MomentOfInertia.ofBaseUnits(0.0009, KilogramSquareMeters);
     public static final MomentOfInertia kPivotMOI = MomentOfInertia.ofBaseUnits(0.02, KilogramSquareMeters);
 
-    public static final double pivotKp = 0.01;
+    public static final double pivotKp = 0.5;
     public static final double pivotKd = 0.0;
     public static final double pivotKs = 0.0;
     public static final double pivotKv = 0.0;
@@ -76,8 +76,8 @@ public class IntakeConstants {
     public static final double rollerSimulatedKv = 0.0;
     public static final double rollerSimulatedKa = 0.0;
 
-    public static final boolean kRollerMotorInverted = false;
-    public static final double kRollerMotorReduction = 1;
+    public static final boolean kRollerMotorInverted = true;
+    public static final double kRollerMotorReduction = (24.0 / 12.0);
     public static final Current kRollerMotorSupplyLimit = Amps.of(50);
     public static final DCMotor kRollerSimulatedGearbox = DCMotor.getFalcon500(1);
 
