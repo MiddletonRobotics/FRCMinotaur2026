@@ -84,7 +84,7 @@ public class IntakeIOHardware implements IntakeIO {
     private static final Executor brakeModeExecutor = Executors.newFixedThreadPool(1);
 
     public IntakeIOHardware() {
-        rollerMotor = new TalonFX(15, "rio");
+        rollerMotor = new TalonFX(15, "*");
 
         rollerMotorConfiguration = new TalonFXConfiguration();
         rollerMotorConfiguration.MotorOutput.Inverted = IntakeConstants.kRollerMotorInverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
@@ -97,7 +97,7 @@ public class IntakeIOHardware implements IntakeIO {
         simpleTryUntilOk(5, () -> rollerMotor.getConfigurator().apply(rollerMotorConfiguration));
         simpleTryUntilOk(5, () -> rollerMotor.optimizeBusUtilization(0, 1.0));
 
-        pivotAbsoluteEncoder = new CANcoder(22, "rio");
+        pivotAbsoluteEncoder = new CANcoder(22, "*");
 
         pivotAbsoluteEncoderConfiguration = new CANcoderConfiguration();
         pivotAbsoluteEncoderConfiguration.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
