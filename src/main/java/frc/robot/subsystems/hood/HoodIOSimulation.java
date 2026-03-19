@@ -30,7 +30,7 @@ public class HoodIOSimulation implements HoodIO {
     private final SingleJointedArmSim hoodSimulation;
     private double hoodAppliedVoltage = 0.0;
 
-    private final PIDController hoodPositionController = new PIDController(0.0, 0.0, 0.0);
+    private final PIDController hoodPositionController = new PIDController(HoodConstants.simulatedKp, 0.0, HoodConstants.simulatedKd);
     private boolean hoodClosedLoop = false;
     private boolean hoodControllerNeedsReset = false;
 

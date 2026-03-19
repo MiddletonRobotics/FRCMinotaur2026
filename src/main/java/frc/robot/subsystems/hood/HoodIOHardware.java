@@ -65,9 +65,9 @@ public class HoodIOHardware implements HoodIO {
             .outputCurrentPeriodMs(20);
 
         hoodMotorConfiguration.closedLoop
-            .p(0)
+            .p(HoodConstants.kP)
             .i(0)
-            .d(0);
+            .d(HoodConstants.kD);
 
         tryUntilOk(hoodMotor, 5, () -> hoodMotor.configure(hoodMotorConfiguration, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
         tryUntilOk(hoodMotor, 5, () -> hoodEncoder.setPosition(HoodConstants.kHoodMinimumPosition.in(Radians)));

@@ -17,8 +17,8 @@ import edu.wpi.first.units.measure.MomentOfInertia;
 import frc.minolib.hardware.MinoCANDevice;
 
 public class HoodConstants {
-    public static final AngularVelocity kHoodMaximumRotationalVelocity = RadiansPerSecond.of(3 * Math.PI);
-    public static final AngularAcceleration kHoodMaximumRotationalAcceleration = RadiansPerSecondPerSecond.of(6 * Math.PI);
+    public static final AngularVelocity kHoodMaximumRotationalVelocity = RadiansPerSecond.of(2 * Math.PI);
+    public static final AngularAcceleration kHoodMaximumRotationalAcceleration = RadiansPerSecondPerSecond.of(12 * Math.PI);
 
     public static final MinoCANDevice kHoodMotor = new MinoCANDevice(14, GlobalConstants.kRioBus);
 
@@ -26,15 +26,15 @@ public class HoodConstants {
     public static final Angle kHoodMaximumPosition = Degrees.of(39); 
     public static final Angle kHoodStartingPosition = Degrees.of(10);
 
-    public static final double kP = 0.1;
+    public static final double kP = 6;
     public static final double kI = 0.0;
-    public static final double kD = 0.0;
-    public static final double kS = 0.0;
+    public static final double kD = 0.04;
+    public static final double kS = 0.15;
     public static final double kV = 0.0;
     public static final double kG = 0.0;
     public static final double kA = 0.0;
 
-    public static final double simulatedKp = 0.01;
+    public static final double simulatedKp = 20.0;
     public static final double simulatedKd = 0.0;
     public static final double simulatedKs = 0.0;
     public static final double simulatedKv = 0.0;
