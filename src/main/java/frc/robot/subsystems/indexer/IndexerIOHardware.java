@@ -75,11 +75,11 @@ public class IndexerIOHardware implements IndexerIO {
     public void updateInputs(IndexerIOInputs inputs) {
         REVUtility.sparkStickyFault = false;
 
-        ifOkOrDefault(indexerMotor, indexerEncoder::getPosition, inputs.position);
-        ifOkOrDefault(indexerMotor, indexerEncoder::getVelocity, inputs.velocity);
-        ifOkOrDefault(indexerMotor, new DoubleSupplier[] { indexerMotor::getBusVoltage, indexerMotor::getAppliedOutput }, x -> x[0] * x[1], inputs.appliedVoltage);
-        ifOkOrDefault(indexerMotor, indexerMotor::getOutputCurrent, inputs.supplyCurrentAmperes);
-        ifOkOrDefault(indexerMotor, indexerMotor::getMotorTemperature, inputs.tempuratureCelcius);
+        inputs.position = indexerEncoder.getPosition();
+        inputs.velocity = indexerEncoder.getVelocity();
+        inputs.appliedVoltage = indexerMotor.getAppliedOutput();
+        inputs.supplyCurrentAmperes = indexerMotor.getOutputCurrent();
+        inputs.tempuratureCelcius = indexerMotor.getMotorTemperature();
         inputs.isMotorConnected = !REVUtility.sparkStickyFault;
     }
 

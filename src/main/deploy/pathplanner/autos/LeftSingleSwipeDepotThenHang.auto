@@ -17,9 +17,39 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "Shooter Open Loop Mid"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Hood Midpoint Position"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "LeftCenterCollectToMidShooting"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Index to Shooter"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 5.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stop Index to Shooter"
           }
         },
         {
@@ -32,6 +62,24 @@
           "type": "path",
           "data": {
             "pathName": "LeftPrepareDepotCollectionToDepotCollect"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StopAndRetractIntake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shooter Open Loop Close-Mid"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Hood Minimum-Midpoint Position"
           }
         },
         {

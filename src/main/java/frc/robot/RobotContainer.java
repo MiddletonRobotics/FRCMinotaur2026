@@ -86,7 +86,7 @@ public class RobotContainer {
 
   private final LoggedDashboardChooser<Command> autoRegistry;
 
-  private double selectedShooterRPM = 0.0;
+  private double targetedShooterVoltage = 4.0;
 
   private Drivetrain buildDrivetrain() {
     if(Robot.isSimulation()) {
@@ -213,30 +213,46 @@ public class RobotContainer {
     hang = buildHang();
 
     tower.setBrakeMode(() -> false);
-
-    autoRegistry = new LoggedDashboardChooser<Command>("Auton Choices", AutoBuilder.buildAutoChooser());
-    autoRegistry.addOption("Drivetrain Translation Dynamic Forward", drivetrain.sysIdDynamic(Drivetrain.SysIdMechanism.SWERVE_TRANSLATION, Direction.kForward));
-    autoRegistry.addOption("Drivetrain Translation Dynamic Reverse", drivetrain.sysIdDynamic(Drivetrain.SysIdMechanism.SWERVE_TRANSLATION, Direction.kReverse));
-    autoRegistry.addOption("Drivetrain Translation Quasisatic Forward", drivetrain.sysIdQuasistatic(Drivetrain.SysIdMechanism.SWERVE_TRANSLATION, Direction.kForward));
-    autoRegistry.addOption("Drivetrain Translation Quasisatic Reverse", drivetrain.sysIdQuasistatic(Drivetrain.SysIdMechanism.SWERVE_TRANSLATION, Direction.kReverse));
     
     NamedCommands.registerCommand("DeployIntake", Commands.runOnce(() -> intake.setPivotGoal(PivotGoal.DEPLOY)));
     NamedCommands.registerCommand("StartIntakeRoller", Commands.runOnce(() -> intake.setRollerGoal(RollerGoal.INTAKE)));
     NamedCommands.registerCommand("Hood Minimum Position", Commands.runOnce(() -> hood.setGoal(HoodGoal.MINIMUM)));
-    NamedCommands.registerCommand("Hood Midpoint Position", Commands.runOnce(() -> hood.setGoal(HoodGoal.MINIMUM)));
-    NamedCommands.registerCommand("Hood Maximum Position", Commands.runOnce(() -> hood.setGoal(HoodGoal.MINIMUM)));
-    NamedCommands.registerCommand("Shooter Open Loop Mid", shooter.runVoltage(8));
+    NamedCommands.registerCommand("Hood Minimum-Midpoint Position", Commands.runOnce(() -> hood.setGoal(HoodGoal.MINIMUM_MIDPOINT)));
+    NamedCommands.registerCommand("Hood Midpoint Position", Commands.runOnce(() -> hood.setGoal(HoodGoal.MIDPOINT)));
+    NamedCommands.registerCommand("Hood Maximum Position", Commands.runOnce(() -> hood.setGoal(HoodGoal.MAXIMUM)));
+    NamedCommands.registerCommand("Shooter Open Loop Close-Mid", shooter.runVoltage(5));
+    NamedCommands.registerCommand("Shooter Open Loop Mid", shooter.runVoltage(7));
     NamedCommands.registerCommand(
       "Hang Sequence", 
       Commands.runOnce(() -> hang.setPivotGoal(HangPivotGoal.DOWN))
         .andThen(Commands.waitSeconds(0.5))
         .finallyDo(() -> hang.setPivotGoal(HangPivotGoal.STOP))
     );
+    NamedCommands.registerCommand("Index to Shooter", 
+      Commands.runOnce(() -> {
+        indexer.setGoal(Goal.INTAKE);
+        tower.setGoal(TowerGoal.INTAKE);
+      }));
+
+    NamedCommands.registerCommand("Stop Index to Shooter", 
+    Commands.runOnce(() -> {
+      indexer.setGoal(Goal.STOP);
+      tower.setGoal(TowerGoal.STOP);
+    }));
+
+    NamedCommands.registerCommand("Stop Intake Rollers", 
+    Commands.runOnce(() -> intake.setRollerGoal(RollerGoal.STOP)));
 
     new EventTrigger("StopAndRetractIntake")
       .onTrue(Commands.runOnce(() -> intake.setPivotGoal(PivotGoal.PARKED)).alongWith(Commands.runOnce(() -> intake.setRollerGoal(RollerGoal.STOP))));
 
     NamedCommands.registerCommand("StopAndRetractIntake", Commands.runOnce(() -> intake.setPivotGoal(PivotGoal.PARKED)).alongWith(Commands.runOnce(() -> intake.setRollerGoal(RollerGoal.STOP))));
+
+    autoRegistry = new LoggedDashboardChooser<Command>("Auton Choices", AutoBuilder.buildAutoChooser());
+    autoRegistry.addOption("Drivetrain Translation Dynamic Forward", drivetrain.sysIdDynamic(Drivetrain.SysIdMechanism.SWERVE_TRANSLATION, Direction.kForward));
+    autoRegistry.addOption("Drivetrain Translation Dynamic Reverse", drivetrain.sysIdDynamic(Drivetrain.SysIdMechanism.SWERVE_TRANSLATION, Direction.kReverse));
+    autoRegistry.addOption("Drivetrain Translation Quasisatic Forward", drivetrain.sysIdQuasistatic(Drivetrain.SysIdMechanism.SWERVE_TRANSLATION, Direction.kForward));
+    autoRegistry.addOption("Drivetrain Translation Quasisatic Reverse", drivetrain.sysIdQuasistatic(Drivetrain.SysIdMechanism.SWERVE_TRANSLATION, Direction.kReverse));
     
     configureDefaultCommands();
     configureDriverBindings();
@@ -247,9 +263,9 @@ public class RobotContainer {
     drivetrain.setDefaultCommand(DrivetrainFactory.handleTeleopDrive(
       drivetrain, 
       robotState, 
-      driverController::getLeftY, 
-      driverController::getLeftX, 
-      driverController::getRightX, 
+      () -> -driverController.getLeftY(), 
+      () -> -driverController.getLeftX(), 
+      () -> driverController.getRightX(), 
       true
     ));
   }
@@ -258,44 +274,54 @@ public class RobotContainer {
     driverController
       .leftTrigger()
       .onTrue(Commands.runOnce(() -> intake.setPivotGoal(PivotGoal.DEPLOY)))
-      .whileTrue(Commands.runEnd(
-        () -> intake.setRollerGoal(RollerGoal.INTAKE), 
-        () -> intake.setRollerGoal(RollerGoal.STOP), 
-        intake
+      .whileTrue(
+        Commands.runEnd(
+          () -> intake.setRollerGoal(RollerGoal.INTAKE), 
+          () -> intake.setRollerGoal(RollerGoal.STOP), 
+          intake
+        )
+      );
+
+    driverController
+      .rightTrigger()
+      .whileTrue(Commands.startEnd(
+        () -> shooter.setGoal(ShooterGoal.VOLTAGE), 
+        () -> shooter.setGoal(ShooterGoal.IDLE), 
+        shooter
       ));
 
     driverController
       .leftBumper()
-      .onTrue(Commands.runOnce(() -> intake.setPivotGoal(PivotGoal.PARKED)))
-      .onTrue(Commands.runEnd(
-        () -> intake.setRollerGoal(RollerGoal.INTAKE), 
-        () -> intake.setRollerGoal(RollerGoal.IDLE), 
-        intake
-      ).withTimeout(1));
-
-      driverController
+      .onTrue(Commands.runOnce(() -> intake.setPivotGoal(PivotGoal.PARKED)));
+   
+    driverController
       .start()
       .onTrue(Commands.runOnce(() -> drivetrain.seedFieldCentric()));
 
-      driverController
-        .rightTrigger()
-        .whileTrue(shooter.runVoltage(selectedShooterRPM));
+    driverController
+      .x()
+      .whileTrue(Commands.runOnce(
+        () -> shooter.setManualVoltage(4.0),
+        shooter
+      ));
 
-      driverController
-        .x()
-        .onTrue(Commands.runOnce(() -> selectedShooterRPM = 4));
-
-      driverController
-        .y()
-        .onTrue(Commands.runOnce(() -> selectedShooterRPM = 8));
+    driverController
+      .y()
+      .whileTrue(Commands.runOnce(
+        () -> shooter.setManualVoltage(8.0),
+        shooter
+      ));
 
       driverController
         .b()
-        .onTrue(Commands.runOnce(() -> selectedShooterRPM = 12));
+        .whileTrue(Commands.runOnce(
+          () -> shooter.setManualVoltage(12.0),
+          shooter
+        ));
 
-      //driverController
-      //  .a()
-      //  .onTrue(Commands.runOnce(null, null));
+      driverController
+      .a()
+      .onTrue(Commands.runOnce(() -> intake.setPivotGoal(PivotGoal.FEED)));
 
       driverController
         .rightBumper()
@@ -368,7 +394,7 @@ public class RobotContainer {
         .whileTrue(Commands.runEnd(
           () -> intake.setRollerGoal(RollerGoal.INTAKE), 
           () -> intake.setRollerGoal(RollerGoal.STOP), 
-          tower
+          intake
         ));
 
       operatorController
@@ -376,23 +402,55 @@ public class RobotContainer {
         .whileTrue(Commands.runEnd(
           () -> intake.setRollerGoal(RollerGoal.EXHAUST), 
           () -> intake.setRollerGoal(RollerGoal.STOP), 
-          tower
+          intake
         ));
 
-        operatorController
-        .povUp()
+      operatorController
+        .leftBumper()
+        .whileTrue(Commands.runEnd(
+          () -> intake.setPivotGoal(PivotGoal.DEPLOY), 
+          () -> intake.setPivotGoal(PivotGoal.DEPLOY), 
+          intake
+        ));
+
+      operatorController
+        .leftTrigger()
+        .whileTrue(Commands.runEnd(
+          () -> intake.setPivotGoal(PivotGoal.PARKED), 
+          () -> intake.setPivotGoal(PivotGoal.PARKED), 
+          intake
+        ));
+
+      operatorController
+        .leftStick()
         .whileTrue(Commands.runEnd(
           () -> hang.setPivotGoal(HangPivotGoal.UP), 
           () -> hang.setPivotGoal(HangPivotGoal.STOP), 
-          tower
+          hang
+        ));
+
+      operatorController
+        .rightStick()
+        .whileTrue(Commands.runEnd(
+          () -> hang.setPivotGoal(HangPivotGoal.DOWN), 
+          () -> hang.setPivotGoal(HangPivotGoal.STOP), 
+          hang
+        ));
+
+      operatorController
+        .povUp()
+        .whileTrue(Commands.runEnd(
+          () -> hang.setWinderGoal(WinderGoal.UP), 
+          () -> hang.setWinderGoal(WinderGoal.STOP), 
+          hang
         ));
 
       operatorController
         .povDown()
         .whileTrue(Commands.runEnd(
-          () -> hang.setPivotGoal(HangPivotGoal.DOWN), 
-          () -> hang.setPivotGoal(HangPivotGoal.STOP), 
-          tower
+          () -> hang.setWinderGoal(WinderGoal.DOWN), 
+          () -> hang.setWinderGoal(WinderGoal.STOP), 
+          hang
         ));
   }
 

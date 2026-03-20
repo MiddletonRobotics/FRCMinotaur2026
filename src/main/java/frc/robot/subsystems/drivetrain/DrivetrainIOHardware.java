@@ -68,7 +68,7 @@ public class DrivetrainIOHardware extends SwerveDrivetrain<TalonFX, TalonFX, CAN
     };
 
     public DrivetrainIOHardware(RobotState robotState, SwerveDrivetrainConstants constants, SwerveModuleConstants<?, ?, ?>... moduleConstants) {
-        super(TalonFX::new, TalonFX::new, CANcoder::new, constants, 50.0, moduleConstants);
+        super(TalonFX::new, TalonFX::new, CANcoder::new, constants, 250.0, moduleConstants);
         this.resetRotation(Rotation2d.kZero);
         this.robotState = robotState;
 
@@ -80,7 +80,7 @@ public class DrivetrainIOHardware extends SwerveDrivetrain<TalonFX, TalonFX, CAN
         accelerationX = getPigeon2().getAccelerationX();
         accelerationY = getPigeon2().getAccelerationY();
 
-        BaseStatusSignal.setUpdateFrequencyForAll(50, angularYawVelocity);
+        BaseStatusSignal.setUpdateFrequencyForAll(250.0, angularYawVelocity);
         BaseStatusSignal.setUpdateFrequencyForAll(
             50,
             angularPitchVelocity,

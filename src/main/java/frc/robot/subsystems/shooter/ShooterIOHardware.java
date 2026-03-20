@@ -82,6 +82,7 @@ public class ShooterIOHardware implements ShooterIO {
         primaryMotorConfiguration.CurrentLimits.StatorCurrentLimitEnable = true;
         primaryMotorConfiguration.CurrentLimits.StatorCurrentLimit = ShooterConstants.kShooterMotorStatorLimit.in(Amps);
         primaryMotorConfiguration.CurrentLimits.SupplyCurrentLimit = ShooterConstants.kShooterMotorSupplyLimit.in(Amps);
+        primaryMotorConfiguration.CurrentLimits.SupplyCurrentLowerTime = 0.5;
 
         otherMotorConfiguration = new TalonFXConfiguration();
         otherMotorConfiguration.MotorOutput.Inverted = ShooterConstants.kOtherShooterMotorInverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
@@ -90,6 +91,7 @@ public class ShooterIOHardware implements ShooterIO {
         otherMotorConfiguration.CurrentLimits.StatorCurrentLimitEnable = true;
         otherMotorConfiguration.CurrentLimits.StatorCurrentLimit = ShooterConstants.kShooterMotorStatorLimit.in(Amps);
         otherMotorConfiguration.CurrentLimits.SupplyCurrentLimit = ShooterConstants.kShooterMotorSupplyLimit.in(Amps);
+        otherMotorConfiguration.CurrentLimits.SupplyCurrentLowerTime = 0.5;
 
         shooterClosedLoopConfiguration = new Slot0Configs()
             .withKP(ShooterConstants.kP)

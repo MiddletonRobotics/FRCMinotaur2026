@@ -23,9 +23,27 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "Shooter Open Loop Close-Mid"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Hood Minimum-Midpoint Position"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "LeftDepotCollectToHang"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Index to Shooter"
           }
         }
       ]

@@ -23,7 +23,7 @@ public class HangConstants {
 
     public static final boolean kPivotMotorInverted = true;
     public static final double kPivotMotorReduction = (1.0 / 1.0) * 2 * Math.PI;
-    public static final Current kPivotMotorSupplyLimit = Amps.of(50);
+    public static final Current kPivotMotorSupplyLimit = Amps.of(80);
     public static final DCMotor kPivotSimulatedGearbox = DCMotor.getNEO(1);
 
     public static final double winderkP = 0.0;

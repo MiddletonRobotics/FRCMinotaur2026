@@ -55,6 +55,7 @@ public class Hood extends SubsystemBase {
     @RequiredArgsConstructor
     public enum HoodGoal {
         MINIMUM(new LoggedTunableNumber("Hood/FullyDownPosition", 10)),
+        MINIMUM_MIDPOINT(new LoggedTunableNumber("Hood/FullyDownPosition", 17.75)),
         MIDPOINT(new LoggedTunableNumber("Hood/HalwayPosition", 24.5)),
         MAXIMUM(new LoggedTunableNumber("Hood/FullyUpPosition", 39.0));
 

@@ -37,7 +37,7 @@ public class IntakeConstants {
     public static final Angle kIntakeMaximumPosition = Radians.of(3.270747); //187.4 degrees
     public static final Angle kIntakeStartingPosition = Radians.of(1.040216);
 
-    public static final Angle kPivotAbsoluteEncoderOffset = Rotations.of(0);
+    public static final Angle kPivotAbsoluteEncoderOffset = Radians.of(-2.4908);
 
     public static final Mass kIntakeMass = Kilograms.of(5.89);
     public static final Distance kIntakeLength = Inches.of(14.0);
@@ -59,7 +59,7 @@ public class IntakeConstants {
 
     public static final boolean kPivotMotorInverted = false;
     public static final double kPivotMotorReduction = (25.0 / 1) * (32.0 / 16.0);
-    public static final Current kPivotMotorSupplyLimit = Amps.of(30);
+    public static final Current kPivotMotorSupplyLimit = Amps.of(20);
     public static final DCMotor kPivotSimulatedGearbox = DCMotor.getNEO(1);
 
     public static final double kPivotMotorPositionConversionFactor = (1 / kPivotMotorReduction) * 2 * Math.PI;

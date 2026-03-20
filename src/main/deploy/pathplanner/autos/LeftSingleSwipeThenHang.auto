@@ -13,13 +13,31 @@
         {
           "type": "named",
           "data": {
-            "name": "StopAndRetractIntake"
+            "name": "Stop Intake Rollers"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shooter Open Loop Close-Mid"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Hood Minimum-Midpoint Position"
           }
         },
         {
           "type": "path",
           "data": {
             "pathName": "LeftCenterCollectToHang"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Index to Shooter"
           }
         }
       ]

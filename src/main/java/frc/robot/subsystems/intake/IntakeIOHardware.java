@@ -101,7 +101,7 @@ public class IntakeIOHardware implements IntakeIO {
 
         pivotAbsoluteEncoderConfiguration = new CANcoderConfiguration();
         pivotAbsoluteEncoderConfiguration.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
-        pivotAbsoluteEncoderConfiguration.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+        pivotAbsoluteEncoderConfiguration.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
         pivotAbsoluteEncoderConfiguration.MagnetSensor.MagnetOffset = IntakeConstants.kPivotAbsoluteEncoderOffset.in(Rotations);    
 
         simpleTryUntilOk(5, () -> pivotAbsoluteEncoder.getConfigurator().apply(pivotAbsoluteEncoderConfiguration));
@@ -164,7 +164,7 @@ public class IntakeIOHardware implements IntakeIO {
             absoluteEncoderVelocity
         ));
         
-        tryUntilOk(pivotMotor, 5, () -> pivotEncoder.setPosition(IntakeConstants.kIntakeMinimumPosition.in(Radians)));
+        tryUntilOk(pivotMotor, 5, () -> pivotEncoder.setPosition(absoluteEncoderPosition.getValue().in(Radians)));
     }
 
     @Override
@@ -194,6 +194,7 @@ public class IntakeIOHardware implements IntakeIO {
         inputs.pivotSupplyCurrentAmperes = pivotMotor.getOutputCurrent();
         inputs.pivotMotorTempuratureCelcius = pivotMotor.getMotorTemperature();
 
+        inputs.pivotAbsoluteEncoderPosition = absoluteEncoderPosition.getValue().in(Radians);
         inputs.pivotAbsoluteEncoderVelocity = absoluteEncoderVelocity.getValue().in(RadiansPerSecond);
     }
 
@@ -256,7 +257,8 @@ public class IntakeIOHardware implements IntakeIO {
             rollerSupplyCurrent,
             rollerTorqueCurrent,
             rollerTemperature,
-            absoluteEncoderPosition
+            absoluteEncoderPosition,
+            absoluteEncoderVelocity
         );
     }
 }

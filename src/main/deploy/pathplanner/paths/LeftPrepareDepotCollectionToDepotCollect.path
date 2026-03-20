@@ -8,19 +8,19 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 0.2985927152317883,
-        "y": 5.123990066225166
+        "x": 0.9107117437722425,
+        "y": 5.353001186239621
       },
       "isLocked": false,
       "linkedName": "LeftDepotPrepareCollectionPose"
     },
     {
       "anchor": {
-        "x": 0.5889900662251655,
+        "x": 0.9,
         "y": 7.105951986754967
       },
       "prevControl": {
-        "x": 0.6761092715231789,
+        "x": 0.9871192052980134,
         "y": 6.80103476821192
       },
       "nextControl": null,

@@ -34,8 +34,8 @@ public class Hang extends SubsystemBase {
 
     @RequiredArgsConstructor
     public enum HangPivotGoal {
-        UP(new LoggedTunableNumber("Hang/Pivot/UpVoltage", 5.0)),
-        DOWN(new LoggedTunableNumber("Hang/Pivot/DownVoltage", -5.0)),
+        UP(new LoggedTunableNumber("Hang/Pivot/UpVoltage", 12.0)),
+        DOWN(new LoggedTunableNumber("Hang/Pivot/DownVoltage", -12.0)),
         STOP(new LoggedTunableNumber("Hang/Pivot/StopVoltage", 0.0));
 
         private final DoubleSupplier rollerVoltage;
@@ -47,8 +47,8 @@ public class Hang extends SubsystemBase {
 
     @RequiredArgsConstructor
     public enum WinderGoal {
-        UP(new LoggedTunableNumber("Hang/Winder/UpVoltage", 5.0)),
-        DOWN(new LoggedTunableNumber("Hang/Winder/DownVoltage", -5.0)),
+        UP(new LoggedTunableNumber("Hang/Winder/UpVoltage", 4.0)),
+        DOWN(new LoggedTunableNumber("Hang/Winder/DownVoltage", -4.0)),
         STOP(new LoggedTunableNumber("Hang/Winder/StopVoltage", 0.0));
 
         private final DoubleSupplier rollerVoltage;

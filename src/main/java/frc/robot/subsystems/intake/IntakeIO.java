@@ -24,6 +24,7 @@ public interface IntakeIO extends SubsystemDataProcessor.IODataRefresher {
         public double pivotSupplyCurrentAmperes = 0.0;
         public double pivotMotorTempuratureCelcius = 0.0;
 
+        public double pivotAbsoluteEncoderPosition = 0.0;
         public double pivotAbsoluteEncoderVelocity = 0.0;
     }
 

@@ -273,4 +273,8 @@ public class Shooter extends SubsystemBase {
             .withTimeout(3.0)
             .withName("Wait For Shooter");
     }
+
+    public double getManualVoltage() {
+        return manualVoltage;
+    }
 }
