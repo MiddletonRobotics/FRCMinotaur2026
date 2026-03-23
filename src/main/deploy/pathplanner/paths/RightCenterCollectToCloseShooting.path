@@ -8,12 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.433236754966887,
-<<<<<<< Updated upstream
-        "y": 0.5502317880794698
-=======
-        "y": 0.814694425459372
->>>>>>> Stashed changes
+        "x": 6.614735099337748,
+        "y": 1.5116480678434785
       },
       "isLocked": false,
       "linkedName": "RightCenterCollectionEndPose"
@@ -24,12 +20,12 @@
         "y": 0.6727520759193351
       },
       "prevControl": {
-        "x": 5.735044992514928,
-        "y": 0.6651757973931058
+        "x": 6.773183531301801,
+        "y": 0.7163116785683421
       },
       "nextControl": {
-        "x": 5.052579226666039,
-        "y": 0.6800120096941704
+        "x": 4.865593473361392,
+        "y": 0.656387383554507
       },
       "isLocked": false,
       "linkedName": "RCP1a"
@@ -40,33 +36,37 @@
         "y": 0.6727520759193351
       },
       "prevControl": {
-        "x": 4.8813357274162765,
-        "y": 0.6727520759193348
+        "x": 5.460573310676321,
+        "y": 0.6817745106825113
       },
       "nextControl": {
-        "x": 2.8768287766893907,
-        "y": 0.6727520759193357
+        "x": 2.725135396290449,
+        "y": 0.6654921421445011
       },
       "isLocked": false,
       "linkedName": "RCP1b"
     },
     {
       "anchor": {
-        "x": 1.5763410596026488,
-        "y": 3.701043046357616
+        "x": 3.1,
+        "y": 4.005960264900662
       },
       "prevControl": {
-        "x": 1.663460264900662,
-        "y": 3.011349337748344
+        "x": 2.4466059602649013,
+        "y": 2.5321937086092716
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "LeftHangPosition"
+      "linkedName": "ActualCloseShootingPoint"
     }
   ],
   "rotationTargets": [
     {
       "waypointRelativePos": 0.5,
+      "rotationDegrees": 180.0
+    },
+    {
+      "waypointRelativePos": 2.0556900726392247,
       "rotationDegrees": 180.0
     }
   ],
@@ -78,12 +78,30 @@
         "y": 4.0
       },
       "rotationOffset": 180.0,
-      "minWaypointRelativePos": 2.3024734982332262,
+      "minWaypointRelativePos": 2.2346289752650157,
       "maxWaypointRelativePos": 3.0,
       "name": "Point Towards Zone"
     }
   ],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "Shooter Open Loop Close",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
+    {
+      "name": "Index to Shooter",
+      "waypointRelativePos": 3.0,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "Hood Midpoint Position"
+        }
+      }
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,

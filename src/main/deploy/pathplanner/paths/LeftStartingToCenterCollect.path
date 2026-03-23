@@ -68,8 +68,45 @@
         "y": 6.169420529801325
       },
       "prevControl": {
+<<<<<<< Updated upstream
         "x": 6.491316225165564,
         "y": 5.385347682119207
+=======
+        "x": 6.672814569533345,
+        "y": 7.258410596023399
+      },
+      "nextControl": {
+        "x": 4.720931729187867,
+        "y": 7.879464227058996
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.664460260972717,
+        "y": 7.009916963226572
+      },
+      "prevControl": {
+        "x": 3.008754448398578,
+        "y": 7.494080664294188
+      },
+      "nextControl": {
+        "x": 2.0100073735803248,
+        "y": 6.089592590331023
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.374933774834437,
+        "y": 5.4506870860927155
+      },
+      "prevControl": {
+        "x": 2.4693129139072854,
+        "y": 6.075041390728477
+>>>>>>> Stashed changes
       },
       "nextControl": null,
       "isLocked": false,
@@ -121,7 +158,7 @@
   "folder": "Left",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 0.0
   },
   "useDefaultConstraints": true
 }

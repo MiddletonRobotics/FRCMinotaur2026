@@ -30,8 +30,8 @@ public class ShooterConstants {
     public static final boolean kPrimaryShooterMotorInverted = false;
     public static final boolean kOtherShooterMotorInverted = true;
     public static final double kShooterMotorReduction = (24.0 / 18.0);
-    public static final Current kShooterMotorSupplyLimit = Amps.of(30);
-    public static final Current kShooterMotorStatorLimit = Amps.of(50);
+    public static final Current kShooterMotorSupplyLimit = Amps.of(25);
+    public static final Current kShooterMotorStatorLimit = Amps.of(80);
     public static final DCMotor kShooterSimulatedGearbox = DCMotor.getKrakenX60Foc(3);
 
     public static final MomentOfInertia kShooterMOI = KilogramSquareMeters.of(0.1);

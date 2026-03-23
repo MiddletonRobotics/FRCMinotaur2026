@@ -92,6 +92,8 @@ public class IntakeIOHardware implements IntakeIO {
         rollerMotorConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         rollerMotorConfiguration.CurrentLimits.SupplyCurrentLimitEnable = true;
         rollerMotorConfiguration.CurrentLimits.SupplyCurrentLimit = IntakeConstants.kRollerMotorSupplyLimit.in(Amps);
+        rollerMotorConfiguration.CurrentLimits.StatorCurrentLimitEnable = true;
+        rollerMotorConfiguration.CurrentLimits.StatorCurrentLimit = 60;
         rollerMotorConfiguration.Feedback.VelocityFilterTimeConstant = IntakeConstants.kRollerVelocityFilterTimeConstant;
 
         simpleTryUntilOk(5, () -> rollerMotor.getConfigurator().apply(rollerMotorConfiguration));
@@ -112,7 +114,7 @@ public class IntakeIOHardware implements IntakeIO {
         pivotMotorConfiguration = new SparkMaxConfig()
             .inverted(IntakeConstants.kPivotMotorInverted)
             .idleMode(IdleMode.kBrake)
-            .smartCurrentLimit((int) IntakeConstants.kPivotMotorSupplyLimit.in(Amps), 50)
+            .smartCurrentLimit((int) IntakeConstants.kPivotMotorSupplyLimit.in(Amps), (int) IntakeConstants.kPivotMotorSupplyLimit.in(Amps))
             .voltageCompensation(12.0);
 
         pivotMotorConfiguration.encoder

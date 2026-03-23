@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.568232502965599,
-        "y": 3.97
+        "x": 3.1,
+        "y": 4.006
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.1916607354685653,
-        "y": 4.2555634638196915
+        "x": 2.8395695364238414,
+        "y": 4.506895695364238
       },
       "isLocked": false,
       "linkedName": "CenterHubStartingPose"
@@ -31,7 +31,14 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "DeployIntake",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,

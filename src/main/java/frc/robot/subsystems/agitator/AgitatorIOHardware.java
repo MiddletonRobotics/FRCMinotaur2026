@@ -40,18 +40,18 @@ public class AgitatorIOHardware implements AgitatorIO {
     private static final Executor brakeModeExecutor = Executors.newFixedThreadPool(1);
 
     public AgitatorIOHardware() {
-        leftAgitatorMotor = new SparkMax(26, MotorType.kBrushless);
+        leftAgitatorMotor = new SparkMax(24, MotorType.kBrushless);
         leftAgitatorEncoder = leftAgitatorMotor.getEncoder();
         leftAgitatorPIDController = leftAgitatorMotor.getClosedLoopController();
 
-        rightAgitatorMotor = new SparkMax(21, MotorType.kBrushless);
+        rightAgitatorMotor = new SparkMax(26, MotorType.kBrushless);
         rightAgitatorEncoder = rightAgitatorMotor.getEncoder();
         rightAgitatorPIDController = rightAgitatorMotor.getClosedLoopController();
 
         agitatorMotorConfiguration = new SparkMaxConfig()
             .inverted(AgitatorConstants.kAgitatorMotorInverted)
             .idleMode(IdleMode.kBrake)
-            .smartCurrentLimit((int) AgitatorConstants.kAgitatorMotorSupplyLimit.in(Amps), 50)
+            .smartCurrentLimit((int) AgitatorConstants.kAgitatorMotorSupplyLimit.in(Amps), (int) AgitatorConstants.kAgitatorMotorSupplyLimit.in(Amps))
             .voltageCompensation(12.0);
 
         agitatorMotorConfiguration.encoder
