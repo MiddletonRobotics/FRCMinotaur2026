@@ -46,6 +46,8 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.minolib.advantagekit.LocalADStarAK;
 import frc.minolib.advantagekit.LoggedTracer;
 import frc.minolib.hardware.MinoCANBus;
+import frc.minolib.io.BatteryIOInputsAutoLogged;
+import frc.minolib.utilities.BatteryLogger;
 import frc.robot.command_factories.DrivetrainFactory;
 import frc.robot.constants.BuildConstants;
 import frc.robot.constants.GlobalConstants;
@@ -74,6 +76,9 @@ public class Robot extends LoggedRobot {
   private final Alert lowBatteryAlert = new Alert("Battery voltage is very low, consider turning off the robot or replacing the battery.", AlertType.kWarning);
   private final Alert jitAlert = new Alert("Please wait to enable, JITing in progress.", AlertType.kWarning);
   private final Alert noAutoSelectedAlert = new Alert("No auto selected: please select an auto", AlertType.kWarning);
+
+  public static final BatteryLogger batteryLogger = new BatteryLogger();
+  private final BatteryIOInputsAutoLogged batteryInputs = new BatteryIOInputsAutoLogged();
 
   public Robot() {
     Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
@@ -155,6 +160,14 @@ public class Robot extends LoggedRobot {
   @Override
   public void robotPeriodic() {
     LoggedTracer.reset();
+
+    batteryInputs.batteryVoltage = RobotController.getBatteryVoltage();
+    batteryInputs.rioCurrent = RobotController.getInputCurrent();
+    Logger.processInputs("BatteryLogger", batteryInputs);
+
+    batteryLogger.setBatteryVoltage(batteryInputs.batteryVoltage);
+    batteryLogger.setRioCurrent(batteryInputs.rioCurrent);
+    LoggedTracer.record("BatteryLogger/Periodic");
 
     CommandScheduler.getInstance().run();
     LoggedTracer.record("Commands");
