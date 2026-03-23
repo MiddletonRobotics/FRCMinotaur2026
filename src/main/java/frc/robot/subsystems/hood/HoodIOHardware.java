@@ -46,7 +46,7 @@ public class HoodIOHardware implements HoodIO {
         hoodMotorConfiguration = new SparkMaxConfig()
             .inverted(HoodConstants.kHoodMotorInverted)
             .idleMode(IdleMode.kBrake)
-            .smartCurrentLimit((int) HoodConstants.kHoodMotorSupplyLimit.in(Amps), 50)
+            .smartCurrentLimit((int) HoodConstants.kHoodMotorSupplyLimit.in(Amps), (int) HoodConstants.kHoodMotorSupplyLimit.in(Amps))
             .voltageCompensation(12.0);
 
         hoodMotorConfiguration.encoder

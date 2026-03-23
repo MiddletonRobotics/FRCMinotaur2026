@@ -28,8 +28,8 @@ public class Agitator extends SubsystemBase {
 
     @RequiredArgsConstructor
     public enum AgitatorGoal {
-        FEED(new LoggedTunableNumber("Agitator/IntakeVoltage", 12.0)),
-        EXHAUST(new LoggedTunableNumber("Agitator/ExhaustVoltage", -6.0)),
+        FEED(new LoggedTunableNumber("Agitator/IntakeVoltage", 1.0)),
+        EXHAUST(new LoggedTunableNumber("Agitator/ExhaustVoltage", -1.0)),
         STOP(new LoggedTunableNumber("Agitator/StopVoltage", 0.0));
 
         private final DoubleSupplier voltage;

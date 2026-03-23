@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import org.dyn4j.geometry.Rotation;
 import org.littletonrobotics.junction.Logger;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -68,8 +69,8 @@ public class DrivetrainIOHardware extends SwerveDrivetrain<TalonFX, TalonFX, CAN
     };
 
     public DrivetrainIOHardware(RobotState robotState, SwerveDrivetrainConstants constants, SwerveModuleConstants<?, ?, ?>... moduleConstants) {
-        super(TalonFX::new, TalonFX::new, CANcoder::new, constants, 50.0, moduleConstants);
-        this.resetRotation(Rotation2d.kZero);
+        super(TalonFX::new, TalonFX::new, CANcoder::new, constants, 250.0, moduleConstants);
+        //this.resetRotation(Rotation2d.kZero);
         this.robotState = robotState;
 
         angularPitchVelocity = getPigeon2().getAngularVelocityYWorld();
@@ -225,5 +226,10 @@ public class DrivetrainIOHardware extends SwerveDrivetrain<TalonFX, TalonFX, CAN
     @Override
     public void resetOdometry(Pose2d pose) {
         this.resetPose(pose);
+    }
+
+    @Override
+    public void setOperatorPerspectiveForward(Rotation2d operatorPerspective) {
+        super.setOperatorPerspectiveForward(operatorPerspective);
     }
 }

@@ -52,7 +52,7 @@ public class Intake extends SubsystemBase {
     public enum PivotGoal {
         DEPLOY(new LoggedTunableNumber("Intake/Pivot/DeployedDegrees", IntakeConstants.kIntakeMaximumPosition.in(Degrees))),
         PARKED(new LoggedTunableNumber("Intake/Pivot/ParkedDegrees", IntakeConstants.kIntakeMinimumPosition.in(Degrees))),
-        FEED(new LoggedTunableNumber("Intake/Pivot/FeedDegrees", 90.0)),
+        FEED(new LoggedTunableNumber("Intake/Pivot/FeedDegrees", 110.0)),
         CLIMB(new LoggedTunableNumber("Intake/Pivot/ClimbDegrees", 70.0));
 
         private final DoubleSupplier positionDegrees;

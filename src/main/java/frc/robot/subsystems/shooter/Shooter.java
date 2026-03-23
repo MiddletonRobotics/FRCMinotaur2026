@@ -7,6 +7,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -28,6 +29,9 @@ public class Shooter extends SubsystemBase {
     private static final LoggedTunableNumber kS = new LoggedTunableNumber("Shooter/kS");
     private static final LoggedTunableNumber kV = new LoggedTunableNumber("Shooter/kV");
     private static final LoggedTunableNumber kA = new LoggedTunableNumber("Shooter/kA");
+    private static final LoggedTunableNumber kMaximumAcceleration = new LoggedTunableNumber("Flywheel/MaxAcceleration", 50.0);
+
+  private SlewRateLimiter slewRateLimiter = new SlewRateLimiter(kMaximumAcceleration.get());
 
     @RequiredArgsConstructor
     public enum ShooterGoal {
@@ -65,12 +69,11 @@ public class Shooter extends SubsystemBase {
     private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
 
     private final Debouncer primaryShooterMotorConnectedDebouncer = new Debouncer(0.5, Debouncer.DebounceType.kFalling);
-    private final Alert primaryShooterMotorDisconnectedAlert = new Alert("Primary shooter motor disconnected!", AlertType.kError);
-
     private final Debouncer secondaryShooterMotorConnectedDebouncer = new Debouncer(0.5, Debouncer.DebounceType.kFalling);
-    private final Alert secondaryShooterMotorDisconnectedAlert = new Alert("Secondary shooter motor disconnected!", AlertType.kError);
-
     private final Debouncer thirdShooterMotorConnectedDebouncer = new Debouncer(0.5, Debouncer.DebounceType.kFalling);
+
+    private final Alert primaryShooterMotorDisconnectedAlert = new Alert("Primary shooter motor disconnected!", AlertType.kError);
+    private final Alert secondaryShooterMotorDisconnectedAlert = new Alert("Secondary shooter motor disconnected!", AlertType.kError);
     private final Alert thirdShooterMotorDisconnectedAlert = new Alert("Third shooter motor disconnected!", AlertType.kError);
 
     @AutoLogOutput(key = "Shooter/BrakeModeEnabled")

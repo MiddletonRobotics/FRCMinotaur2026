@@ -55,7 +55,7 @@ public class TowerIOHardware implements TowerIO {
         topTowerMotorConfiguration = new SparkMaxConfig()
             .inverted(TowerConstants.kTopRollerMotorInverted)
             .idleMode(IdleMode.kBrake)
-            .smartCurrentLimit((int) TowerConstants.kTopRollerMotorSupplyLimit.in(Amps), 50)
+            .smartCurrentLimit((int) TowerConstants.kTopRollerMotorSupplyLimit.in(Amps), (int) TowerConstants.kTopRollerMotorSupplyLimit.in(Amps))
             .voltageCompensation(12.0);
 
         topTowerMotorConfiguration.encoder
@@ -83,7 +83,7 @@ public class TowerIOHardware implements TowerIO {
         bottomTowerMotorConfiguration = new SparkMaxConfig()
             .inverted(TowerConstants.kTopRollerMotorInverted)
             .idleMode(IdleMode.kBrake)
-            .smartCurrentLimit((int) TowerConstants.kTopRollerMotorSupplyLimit.in(Amps), 50)
+            .smartCurrentLimit((int) TowerConstants.kBottomRollerMotorSupplyLimit.in(Amps), (int) TowerConstants.kBottomRollerMotorSupplyLimit.in(Amps))
             .voltageCompensation(12.0);
 
         bottomTowerMotorConfiguration.encoder

@@ -27,7 +27,7 @@ public class IndexerConstants {
 
     public static final boolean kIndexerMotorInverted = true;
     public static final double kIndexerMotorReduction = (24.0 / 14.0);
-    public static final Current kIndexerMotorSupplyLimit = Amps.of(50);
+    public static final Current kIndexerMotorSupplyLimit = Amps.of(40);
     
     public static final DCMotor kIndexerSimulatedGearbox = DCMotor.getNEO(1);
 

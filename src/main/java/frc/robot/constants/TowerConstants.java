@@ -28,7 +28,7 @@ public class TowerConstants {
 
     public static final boolean kTopRollerMotorInverted = true;
     public static final double kTopRollerMotorReduction = (1.0 / 1.0) * 2 * Math.PI;
-    public static final Current kTopRollerMotorSupplyLimit = Amps.of(30);
+    public static final Current kTopRollerMotorSupplyLimit = Amps.of(20);
     public static final DCMotor kTopRollerSimulatedGearbox = DCMotor.getNEO(1);
 
     public static final double bottomRollerkP = 0.0;
@@ -46,7 +46,7 @@ public class TowerConstants {
 
     public static final boolean kBottomRollerMotorInverted = false;
     public static final double kBottomRollerMotorReduction = (1.0 / 1.0) * 2 * Math.PI;
-    public static final Current kBottomRollerMotorSupplyLimit = Amps.of(70);
+    public static final Current kBottomRollerMotorSupplyLimit = Amps.of(20);
     public static final DCMotor kBottomRollerSimulatedGearbox = DCMotor.getNEO(1);
 
     public static final MomentOfInertia kTopRollerMOI = KilogramSquareMeters.of(0.0002);

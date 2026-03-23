@@ -16,12 +16,21 @@
     },
     {
       "anchor": {
+<<<<<<< Updated upstream
         "x": 1.5763410596026488,
         "y": 3.701043046357616
       },
       "prevControl": {
         "x": 2.164155629139073,
         "y": 3.7311258278145694
+=======
+        "x": 3.1,
+        "y": 4.006
+      },
+      "prevControl": {
+        "x": 1.5545612582781454,
+        "y": 4.477855960264901
+>>>>>>> Stashed changes
       },
       "nextControl": null,
       "isLocked": false,
@@ -31,7 +40,34 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
+<<<<<<< Updated upstream
   "eventMarkers": [],
+=======
+  "eventMarkers": [
+    {
+      "name": "Hood Minimum Position",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "Shooter Open Loop Close"
+        }
+      }
+    },
+    {
+      "name": "Index to Shooter",
+      "waypointRelativePos": 1.0,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "StopAndRetractIntakeHalf"
+        }
+      }
+    }
+  ],
+>>>>>>> Stashed changes
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,

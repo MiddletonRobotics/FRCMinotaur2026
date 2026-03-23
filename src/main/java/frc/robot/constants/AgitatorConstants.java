@@ -9,7 +9,7 @@ import edu.wpi.first.units.measure.MomentOfInertia;
 
 public class AgitatorConstants {
     public static final double kP = 0.0;
-    public static final double kI = 0.0;
+    public static final double kIp = 0.0;
     public static final double kD = 0.0;
     public static final double kS = 0.0;
     public static final double kV = 0.0;
@@ -22,7 +22,7 @@ public class AgitatorConstants {
     public static final double simulatedKv = 0.0;
     public static final double simulatedKa = 0.0;
 
-    public static final boolean kAgitatorMotorInverted = false;
+    public static final boolean kAgitatorMotorInverted = true;
     public static final double kAgitatorMotorReduction = (1.0 / 1.0);
     public static final Current kAgitatorMotorSupplyLimit = Amps.of(50);
     
