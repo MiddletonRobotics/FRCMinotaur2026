@@ -70,7 +70,6 @@ public class DrivetrainIOHardware extends SwerveDrivetrain<TalonFX, TalonFX, CAN
 
     public DrivetrainIOHardware(RobotState robotState, SwerveDrivetrainConstants constants, SwerveModuleConstants<?, ?, ?>... moduleConstants) {
         super(TalonFX::new, TalonFX::new, CANcoder::new, constants, 250.0, moduleConstants);
-        //this.resetRotation(Rotation2d.kZero);
         this.robotState = robotState;
 
         angularPitchVelocity = getPigeon2().getAngularVelocityYWorld();
@@ -81,7 +80,7 @@ public class DrivetrainIOHardware extends SwerveDrivetrain<TalonFX, TalonFX, CAN
         accelerationX = getPigeon2().getAccelerationX();
         accelerationY = getPigeon2().getAccelerationY();
 
-        BaseStatusSignal.setUpdateFrequencyForAll(250.0, angularYawVelocity);
+        BaseStatusSignal.setUpdateFrequencyForAll(250, angularYawVelocity);
         BaseStatusSignal.setUpdateFrequencyForAll(
             50,
             angularPitchVelocity,
@@ -92,11 +91,17 @@ public class DrivetrainIOHardware extends SwerveDrivetrain<TalonFX, TalonFX, CAN
             accelerationY
         );
 
-        this.getOdometryThread().setThreadPriority(99);
+        getPigeon2().optimizeBusUtilization(0);
+        
+        for(SwerveModule<TalonFX, TalonFX, CANcoder> module : getModules()) {
+            module.getDriveMotor().optimizeBusUtilization(0);
+            module.getSteerMotor().optimizeBusUtilization(0);
+        }
+
         registerTelemetry(telemetryConsumer);
     }
 
-     @Override
+    @Override
     public void updateInputs(DrivetrainIOInputs inputs) {
         if (telemetryCache.get() == null) return;
         inputs.logState(telemetryCache.get());
@@ -164,20 +169,6 @@ public class DrivetrainIOHardware extends SwerveDrivetrain<TalonFX, TalonFX, CAN
             Logger.recordOutput(moduleNames[i] + "Drive Motor Velocity", swerveState.ModuleStates[i].speedMetersPerSecond);
             Logger.recordOutput(moduleNames[i] + "Target Drive Motor Velocity", swerveState.ModuleTargets[i].speedMetersPerSecond);
         }
-
-        // for (int i = 0; i < 4; i++) {
-        //     var moduleMap = signalsMap.get(i);
-
-        //     inputs[i].driveSupplyCurrentAmperes = moduleMap.get("driveSupplyCurrentAmperes").getValueAsDouble();
-        //     inputs[i].driveStatorCurrentAmperes = moduleMap.get("driveStatorCurrentAmperes").getValueAsDouble();
-        //     inputs[i].driveAppliedVoltage = moduleMap.get("driveAppliedVoltage").getValueAsDouble();
-        //     inputs[i].driveTemperatureCelsius = moduleMap.get("driveTemperatureCelsius").getValueAsDouble();
-
-        //     inputs[i].steerSupplyCurrentAmperes = moduleMap.get("steerSupplyCurrentAmperes").getValueAsDouble();
-        //     inputs[i].steerStatorCurrentAmperes = moduleMap.get("steerStatorCurrentAmperes").getValueAsDouble();
-        //     inputs[i].steerAppliedVoltage = moduleMap.get("steerAppliedVoltage").getValueAsDouble();
-        //     inputs[i].steerTemperatureCelsius = moduleMap.get("steerTemperatureCelsius").getValueAsDouble();
-        // }
     }
 
 
