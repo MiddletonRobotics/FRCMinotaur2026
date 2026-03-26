@@ -40,14 +40,10 @@ import frc.robot.subsystems.drivetrain.Drivetrain;
 import frc.robot.subsystems.drivetrain.DrivetrainIOHardware;
 import frc.robot.subsystems.drivetrain.DrivetrainIOSimulation;
 import frc.robot.subsystems.drivetrain.SimulationTunerConstants;
-import frc.robot.subsystems.hang.Hang;
-import frc.robot.subsystems.hang.HangIOHardware;
-import frc.robot.subsystems.hang.Hang.HangPivotGoal;
-import frc.robot.subsystems.hang.Hang.WinderGoal;
-import frc.robot.subsystems.hood.Hood;
-import frc.robot.subsystems.hood.HoodIOHardware;
-import frc.robot.subsystems.hood.HoodIOSimulation;
-import frc.robot.subsystems.hood.Hood.HoodGoal;
+import frc.robot.subsystems.shooter.hood.Hood;
+import frc.robot.subsystems.shooter.hood.HoodIOHardware;
+import frc.robot.subsystems.shooter.hood.HoodIOSimulation;
+import frc.robot.subsystems.shooter.hood.Hood.HoodGoal;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIOCTRE;
 import frc.robot.subsystems.indexer.IndexerIOHardware;
@@ -62,7 +58,6 @@ import frc.robot.subsystems.shooter.Shooter.ShooterGoal;
 import frc.robot.subsystems.shooter.ShooterIOHardware;
 import frc.robot.subsystems.shooter.ShooterIOSimulation;
 import frc.robot.subsystems.tower.Tower;
-import frc.robot.subsystems.tower.TowerIO;
 import frc.robot.subsystems.tower.TowerIOHardware;
 import frc.robot.subsystems.tower.Tower.TowerGoal;
 
@@ -212,7 +207,13 @@ public class RobotContainer {
     hood = buildHood();
     agitator = getAgitator();
 
-    tower.setBrakeMode(() -> false);
+    DriverStation.silenceJoystickConnectionWarning(true);
+
+    autoRegistry = new LoggedDashboardChooser<Command>("Auton Choices", AutoBuilder.buildAutoChooser());
+    autoRegistry.addOption("Drivetrain Translation Dynamic Forward", drivetrain.sysIdDynamic(Drivetrain.SysIdMechanism.SWERVE_TRANSLATION, Direction.kForward));
+    autoRegistry.addOption("Drivetrain Translation Dynamic Reverse", drivetrain.sysIdDynamic(Drivetrain.SysIdMechanism.SWERVE_TRANSLATION, Direction.kReverse));
+    autoRegistry.addOption("Drivetrain Translation Quasisatic Forward", drivetrain.sysIdQuasistatic(Drivetrain.SysIdMechanism.SWERVE_TRANSLATION, Direction.kForward));
+    autoRegistry.addOption("Drivetrain Translation Quasisatic Reverse", drivetrain.sysIdQuasistatic(Drivetrain.SysIdMechanism.SWERVE_TRANSLATION, Direction.kReverse));
     
     NamedCommands.registerCommand("DeployIntake", Commands.runOnce(() -> intake.setPivotGoal(PivotGoal.DEPLOY)));
     NamedCommands.registerCommand("StartIntakeRoller", Commands.runOnce(() -> intake.setRollerGoal(RollerGoal.INTAKE)));
@@ -333,9 +334,9 @@ public class RobotContainer {
     drivetrain.setDefaultCommand(DrivetrainFactory.handleTeleopDrive(
       drivetrain, 
       robotState, 
-      () -> -driverController.getLeftY() * DrivetrainConstants.kMaximumLinearVelocity.in(MetersPerSecond), 
-      () -> -driverController.getLeftX() * DrivetrainConstants.kMaximumLinearVelocity.in(MetersPerSecond), 
-      () -> -driverController.getRightX() * DrivetrainConstants.kMaximumLinearVelocity.in(MetersPerSecond), 
+      () -> -driverController.getLeftY(), 
+      () -> -driverController.getLeftX(), 
+      () -> -driverController.getRightX(), 
       true
     ));
   }
