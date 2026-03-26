@@ -65,14 +65,14 @@ public class DrivetrainFactory {
 
         magnitudeTheta = Math.copySign(magnitudeTheta * magnitudeTheta, magnitudeTheta);
 
-        //double velocityX = robotState.isRedAlliance() ? -magnitudeX * DrivetrainConstants.kMaximumLinearVelocity.in(MetersPerSecond) : magnitudeX * DrivetrainConstants.kMaximumLinearVelocity.in(MetersPerSecond);
-        //double velocityY = robotState.isRedAlliance() ? -magnitudeY * DrivetrainConstants.kMaximumLinearVelocity.in(MetersPerSecond) : magnitudeY * DrivetrainConstants.kMaximumLinearVelocity.in(MetersPerSecond);
-        //double velocityTheta = robotState.isRedAlliance() ? -magnitudeTheta * DrivetrainConstants.kMaximumRotationalVelocity.in(RadiansPerSecond) : magnitudeTheta * DrivetrainConstants.kMaximumRotationalVelocity.in(RadiansPerSecond);
+        double velocityX = magnitudeX * DrivetrainConstants.kMaximumLinearVelocity.in(MetersPerSecond);
+        double velocityY = magnitudeY * DrivetrainConstants.kMaximumLinearVelocity.in(MetersPerSecond);
+        double velocityTheta = magnitudeTheta * DrivetrainConstants.kMaximumRotationalVelocity.in(RadiansPerSecond);
 
         Rotation2d skewCompensationFactor = Rotation2d.fromRadians(robotState.getLatestMeasuredRobotRelativeChassisSpeeds().omegaRadiansPerSecond * -0.03); // TODO: Shew Compenstation to go in DrivetrainConstnats
 
         return ChassisSpeeds.fromRobotRelativeSpeeds(
-            ChassisSpeeds.fromFieldRelativeSpeeds(new ChassisSpeeds(magnitudeX, magnitudeY, magnitudeTheta), robotState.getLatestFieldToRobot().getValue().getRotation()), 
+            ChassisSpeeds.fromFieldRelativeSpeeds(new ChassisSpeeds(velocityX, velocityY, velocityTheta), robotState.getLatestFieldToRobot().getValue().getRotation()), 
             robotState.getLatestFieldToRobot().getValue().getRotation().plus(skewCompensationFactor)
         );
     }
