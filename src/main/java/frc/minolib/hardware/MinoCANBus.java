@@ -79,7 +79,7 @@ public class MinoCANBus {
     inputs.isNetworkFD = canBus.isNetworkFD();
     Logger.processInputs(loggingName, inputs);
 
-    boolean debouncedError = canivoreConnectedDebouncer.calculate(status.Status.isOK() || status.REC > 0 || status.TEC > 0);
+    boolean debouncedError = canivoreConnectedDebouncer.calculate(!status.Status.isOK() || status.REC > 0 || status.TEC > 0);
     canivoreErrorAlert.set(debouncedError);
   }
 
