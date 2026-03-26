@@ -1,4 +1,4 @@
-package frc.robot.subsystems.hood;
+package frc.robot.subsystems.shooter.hood;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
@@ -23,7 +23,7 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import frc.minolib.math.MathUtility;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.HoodConstants;
-import frc.robot.subsystems.hood.HoodIO.HoodIOInputs;
+import frc.robot.subsystems.shooter.hood.HoodIO.HoodIOInputs;
 
 public class HoodIOSimulation implements HoodIO {
     private final DCMotor hoodGearbox;

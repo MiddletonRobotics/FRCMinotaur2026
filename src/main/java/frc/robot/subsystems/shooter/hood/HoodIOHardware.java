@@ -1,4 +1,4 @@
-package frc.robot.subsystems.hood;
+package frc.robot.subsystems.shooter.hood;
 
 import static frc.minolib.rev.REVUtility.tryUntilOk;
 import static frc.minolib.rev.REVUtility.ifOkOrDefault;
@@ -26,7 +26,7 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import frc.minolib.hardware.MinoCANDevice;
 import frc.minolib.rev.REVUtility;
 import frc.robot.constants.HoodConstants;
-import frc.robot.subsystems.hood.HoodIO.HoodIOInputs;
+import frc.robot.subsystems.shooter.hood.HoodIO.HoodIOInputs;
 
 public class HoodIOHardware implements HoodIO {
     private SparkMax hoodMotor;

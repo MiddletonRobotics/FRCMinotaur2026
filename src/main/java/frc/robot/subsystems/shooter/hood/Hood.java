@@ -1,4 +1,4 @@
-package frc.robot.subsystems.hood;
+package frc.robot.subsystems.shooter.hood;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
@@ -31,8 +31,7 @@ import frc.minolib.utilities.SubsystemDataProcessor;
 import frc.robot.Robot;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.HoodConstants;
-import frc.robot.subsystems.intake.Intake.PivotGoal;
-import frc.robot.subsystems.intake.Intake.RollerGoal;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
