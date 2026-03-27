@@ -1,4 +1,4 @@
-package frc.robot.subsystems.shooter;
+package frc.robot.subsystems.shooter.flywheel;
 
 import static frc.minolib.phoenix.PhoenixUtility.simpleTryUntilOk;
 
