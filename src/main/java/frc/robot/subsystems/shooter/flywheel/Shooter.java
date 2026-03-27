@@ -1,4 +1,4 @@
-package frc.robot.subsystems.shooter;
+package frc.robot.subsystems.shooter.flywheel;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -18,8 +18,7 @@ import frc.minolib.utilities.SubsystemDataProcessor;
 import frc.robot.Robot;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.ShooterConstants;
-import frc.robot.subsystems.shooter.ShooterIO.ShooterIOInputs;
-
+import frc.robot.subsystems.shooter.flywheel.ShooterIO.ShooterIOInputs;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
