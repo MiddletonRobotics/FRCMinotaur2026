@@ -8,6 +8,8 @@ import java.util.function.DoubleSupplier;
 import org.dyn4j.geometry.Rotation;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.swerve.SwerveModule.SteerRequestType;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -31,27 +33,19 @@ public class DrivetrainFactory {
                     .withVelocityX(speeds.vxMetersPerSecond)
                     .withVelocityY(speeds.vyMetersPerSecond)
                     .withRotationalRate(speeds.omegaRadiansPerSecond)
+                    .withDriveRequestType(DriveRequestType.OpenLoopVoltage)
+                    .withSteerRequestType(SteerRequestType.MotionMagicExpo)
                 );
             } else {
                 drivetrain.setControl(new SwerveRequest.RobotCentric()
                     .withVelocityX(speeds.vxMetersPerSecond)
                     .withVelocityY(speeds.vyMetersPerSecond)
                     .withRotationalRate(speeds.omegaRadiansPerSecond)
+                    .withDriveRequestType(DriveRequestType.OpenLoopVoltage)
+                    .withSteerRequestType(SteerRequestType.MotionMagicExpo)
                 );
             }
         }, drivetrain);
-    }
-
-    public static Command automaticLockHeading(Drivetrain drivetrain, RobotState robotState, DoubleSupplier throttleSupplier, DoubleSupplier strafeSupplier, Rotation2d headingToLock) {
-        return Commands.run(() -> {
-            ChassisSpeeds speeds = calculateSpeedsBasedOnJoystickInputs(drivetrain, robotState, throttleSupplier, strafeSupplier, () -> 0);
-
-            drivetrain.setControl(new SwerveRequest.FieldCentricFacingAngle()
-                .withVelocityX(speeds.vxMetersPerSecond)
-                .withVelocityY(speeds.vyMetersPerSecond)
-                .withTargetDirection(headingToLock)
-            );
-        });
     }
 
     private static ChassisSpeeds calculateSpeedsBasedOnJoystickInputs(Drivetrain drivetrain, RobotState robotState, DoubleSupplier throttleSuppler, DoubleSupplier strafeSupplier, DoubleSupplier rotationSupplier) {
