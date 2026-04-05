@@ -60,7 +60,7 @@ import frc.robot.constants.IntakeConstants;
 
 public class IntakeIOHardware implements IntakeIO {
     private TalonFX rollerMotor;
-    private SparkMax pivotMotor;
+    private TalonFX pivotMotor;
     //private CANcoder pivotAbsoluteEncoder;
 
     private final StatusSignal<Angle> rollerPosition;
@@ -124,36 +124,31 @@ public class IntakeIOHardware implements IntakeIO {
         //simpleTryUntilOk(5, () -> pivotAbsoluteEncoder.getConfigurator().apply(pivotAbsoluteEncoderConfiguration));
         //simpleTryUntilOk(5, () -> pivotAbsoluteEncoder.optimizeBusUtilization(0, 1.0));
 
-        pivotMotor = new SparkMax(14, MotorType.kBrushless);
+        pivotMotor = new TalonFX(45, GlobalConstants.kRioBus.getParent());;
 
-        pivotMotorConfiguration = new SparkMaxConfig()
-            .inverted(IntakeConstants.kPivotMotorInverted)
-            .idleMode(IdleMode.kBrake)
-            .smartCurrentLimit((int) IntakeConstants.kPivotMotorSupplyLimit.in(Amps), (int) IntakeConstants.kPivotMotorSupplyLimit.in(Amps))
-            .voltageCompensation(12.0);
+        rollerMotorConfiguration = new TalonFXConfiguration()
+             .withCurrentLimits(
+                new CurrentLimitsConfigs()
+                    //.withStatorCurrentLimitEnable(true)
+                    //.withStatorCurrentLimit(100)
+                    //.withSupplyCurrentLimitEnable(true)
+                    //.withSupplyCurrentLimit(IntakeConstants.kRollerMotorSupplyLimit.in(Amps))
+                    //.withSupplyCurrentLowerLimit(25)
+                    //.withSupplyCurrentLowerTime(1)
+            )
+            .withMotorOutput(
+                new MotorOutputConfigs()
+                    .withInverted(IntakeConstants.kPivotMotorInverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive)
+                    .withNeutralMode(NeutralModeValue.Brake)
+            )
+            .withFeedback(
+                new FeedbackConfigs()
+                    .withRotorToSensorRatio(IntakeConstants.kPivotMotorReduction * 2 * Math.PI)
+            );
 
-        pivotMotorConfiguration.encoder
-            .positionConversionFactor(IntakeConstants.kPivotMotorPositionConversionFactor)
-            .velocityConversionFactor(IntakeConstants.kPivotMotorVelocityConversionFactor)
-            .uvwMeasurementPeriod(10)
-            .uvwAverageDepth(2);
-
-        pivotMotorConfiguration.signals
-            .primaryEncoderPositionAlwaysOn(true)
-            .primaryEncoderPositionPeriodMs(20)
-            .primaryEncoderVelocityAlwaysOn(true)
-            .primaryEncoderVelocityPeriodMs(20)
-            .appliedOutputPeriodMs(20)
-            .busVoltagePeriodMs(20)
-            .outputCurrentPeriodMs(20);
-
-        pivotMotorConfiguration.closedLoop
-            .p(IntakeConstants.pivotKp)
-            .i(0.0)
-            .d(IntakeConstants.pivotKd);
-
-        tryUntilOk(pivotMotor, 5, () -> pivotMotor.configure(pivotMotorConfiguration, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
-
+        simpleTryUntilOk(5, () -> pivotMotor.getConfigurator().apply(rollerMotorConfiguration));
+        simpleTryUntilOk(5, () -> pivotMotor.optimizeBusUtilization(0, 1.0));
+        
         pivotEncoder = pivotMotor.getEncoder();
         pivotPositionController = pivotMotor.getClosedLoopController();
 
