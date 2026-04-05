@@ -3,6 +3,8 @@ package frc.robot.constants;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.MomentOfInertia;
@@ -38,4 +40,6 @@ public class ShooterConstants {
 
     public static final double kShooterMotorPositionConversionFactor = (1 / kShooterMotorReduction) * 2 * Math.PI;
     public static final double kShooterMotorVelocityConversionFactor = 1 / kShooterMotorPositionConversionFactor;
+
+    public static Transform3d kRobotToShooterTransform = new Transform3d(-0.276, 0.09, 0.599, new Rotation3d(0.0, 0.0, Math.PI));
 }

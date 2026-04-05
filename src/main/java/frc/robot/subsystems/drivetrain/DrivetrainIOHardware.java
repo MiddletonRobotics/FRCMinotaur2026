@@ -1,8 +1,11 @@
 package frc.robot.subsystems.drivetrain;
 
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Celsius;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -95,7 +98,7 @@ public class DrivetrainIOHardware extends SwerveDrivetrain<TalonFX, TalonFX, CAN
     }
 
     @Override
-    public void updateInputs(DrivetrainIOInputs inputs) {
+    public void updateDrivetrainInputs(DrivetrainIOInputs inputs) {
         if (telemetryCache.get() == null) return;
         inputs.logState(telemetryCache.get());
 
@@ -152,15 +155,17 @@ public class DrivetrainIOHardware extends SwerveDrivetrain<TalonFX, TalonFX, CAN
     }
 
     @Override
-    public void logModules(SwerveDriveState swerveState) {
-        final String[] moduleNames = { "Drivetrain/FL", "Drivetrain/FR", "Drivetrain/BL", "Drivetrain/BR" };
-
+    public void updateModuleInputs(ModuleIOInputs inputs) {
         for(int i = 0; i < getModules().length; i++) {
-            Logger.recordOutput(moduleNames[i] + "Absolute Encoder Angle", getModule(i).getEncoder().getAbsolutePosition().getValue().in(Radians));
-            Logger.recordOutput(moduleNames[i] + "Steer Motor Angle", swerveState.ModuleStates[i].angle);
-            Logger.recordOutput(moduleNames[i] + "Target Steer Motor Angle", swerveState.ModuleTargets[i].angle);
-            Logger.recordOutput(moduleNames[i] + "Drive Motor Velocity", swerveState.ModuleStates[i].speedMetersPerSecond);
-            Logger.recordOutput(moduleNames[i] + "Target Drive Motor Velocity", swerveState.ModuleTargets[i].speedMetersPerSecond);
+            inputs.driveSupplyCurrentAmperes = getModule(i).getDriveMotor().getSupplyCurrent().getValue().in(Amps);
+            inputs.driveStatorCurrentAmperes = getModule(i).getDriveMotor().getStatorCurrent().getValue().in(Amps);
+            inputs.driveAppliedVoltage = getModule(i).getDriveMotor().getMotorVoltage().getValue().in(Volts);
+            inputs.driveTemperatureCelsius = getModule(i).getDriveMotor().getDeviceTemp().getValue().in(Celsius);
+
+            inputs.steerSupplyCurrentAmperes = getModule(i).getSteerMotor().getSupplyCurrent().getValue().in(Amps);
+            inputs.steerStatorCurrentAmperes = getModule(i).getSteerMotor().getStatorCurrent().getValue().in(Amps);
+            inputs.steerAppliedVoltage = getModule(i).getSteerMotor().getMotorVoltage().getValue().in(Volts);
+            inputs.steerTemperatureCelsius = getModule(i).getSteerMotor().getDeviceTemp().getValue().in(Celsius);
         }
     }
 

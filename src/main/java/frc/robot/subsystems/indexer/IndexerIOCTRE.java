@@ -62,7 +62,7 @@ public class IndexerIOCTRE implements IndexerIO {
     private static final Executor brakeModeExecutor = Executors.newFixedThreadPool(1);
 
     public IndexerIOCTRE() {
-        indexerMotor = new TalonFX(54, "*");
+        indexerMotor = new TalonFX(54, "rio");
 
         indexerMotorConfiguration = new TalonFXConfiguration();
         indexerMotorConfiguration.MotorOutput.Inverted = IndexerConstants.kIndexerMotorInverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;

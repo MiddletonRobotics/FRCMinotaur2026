@@ -43,6 +43,13 @@ public class Drivetrain extends SubsystemBase {
 
     private DrivetrainIOInputsAutoLogged inputs = new DrivetrainIOInputsAutoLogged();
 
+    private ModuleIOInputsAutoLogged frontLeftInputs = new ModuleIOInputsAutoLogged();
+    private ModuleIOInputsAutoLogged frontRightInputs = new ModuleIOInputsAutoLogged();
+    private ModuleIOInputsAutoLogged backLeftInputs = new ModuleIOInputsAutoLogged();
+    private ModuleIOInputsAutoLogged backRightInputs = new ModuleIOInputsAutoLogged();
+
+    private final Object moduleIOLock = new Object();
+
     private RobotConfig robotConfig;
 
     private final SwerveRequest.SwerveDriveBrake brakeRequest = new SwerveRequest.SwerveDriveBrake();
@@ -113,7 +120,7 @@ public class Drivetrain extends SubsystemBase {
 
     @Override
     public void periodic() {
-        io.updateInputs(inputs);
+        io.updateDrivetrainInputs(inputs);
         Logger.processInputs("Drivetrain", inputs);
 
         robotState.incrementIterationCount();
