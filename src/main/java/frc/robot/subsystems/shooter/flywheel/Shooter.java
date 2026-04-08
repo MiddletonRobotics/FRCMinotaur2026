@@ -3,6 +3,7 @@ package frc.robot.subsystems.shooter.flywheel;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
+import org.ironmaple.simulation.Goal;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -10,10 +11,13 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.minolib.advantagekit.LoggedTracer;
 import frc.minolib.advantagekit.LoggedTunableNumber;
+import frc.minolib.math.EqualsUtility;
 import frc.minolib.utilities.SubsystemDataProcessor;
 import frc.robot.Robot;
 import frc.robot.constants.GlobalConstants;
@@ -28,23 +32,23 @@ public class Shooter extends SubsystemBase {
     private static final LoggedTunableNumber kS = new LoggedTunableNumber("Shooter/kS");
     private static final LoggedTunableNumber kV = new LoggedTunableNumber("Shooter/kV");
     private static final LoggedTunableNumber kA = new LoggedTunableNumber("Shooter/kA");
-    private static final LoggedTunableNumber kMaximumAcceleration = new LoggedTunableNumber("Flywheel/MaxAcceleration", 50.0);
 
-  private SlewRateLimiter slewRateLimiter = new SlewRateLimiter(kMaximumAcceleration.get());
+    private static final LoggedTunableNumber rpmTolerance = new LoggedTunableNumber("Shooter/RPMTolerance", 75.0);
+    private static final LoggedTunableNumber readyDebounceSeconds = new LoggedTunableNumber("Shooter/ReadyDebounceSeconds", 0.10);
 
-    @RequiredArgsConstructor
     public enum ShooterGoal {
-        CLOSE(new LoggedTunableNumber("Shooter/CloseSetpoint", 4)),
-        MEDIUM(new LoggedTunableNumber("Shooter/MediumSetpoint", 8)),
-        FAR(new LoggedTunableNumber("Shooter/FarSetpoint", 12)),
-        IDLE(new LoggedTunableNumber("Shooter/IdleSetpoint", 2)),
-        STOP(new LoggedTunableNumber("Shooter/StopSetpoint", 0.0));
+        IDLE,
+        VELOCITY,
+        VOLTAGE,
+        REVERSE
+    }
 
-        private final DoubleSupplier voltage;
-
-        public double getVoltage() {
-            return voltage.getAsDouble();
-        }
+    public enum ShooterState {
+        IDLE,
+        SPINNING_UP,
+        AT_VELOCITY,
+        AT_VOLTAGE,
+        REVERSING
     }
 
     static {
@@ -56,10 +60,10 @@ public class Shooter extends SubsystemBase {
                 kA.initDefault(ShooterConstants.kA);
             }
             case SIMBOT -> {
-                kP.initDefault(ShooterConstants.simulatedKp);
-                kS.initDefault(ShooterConstants.simulatedKs);
-                kV.initDefault(ShooterConstants.simulatedKv);
-                kA.initDefault(ShooterConstants.simulatedKa);
+                kP.initDefault(0.0);
+                kS.initDefault(0.0);
+                kV.initDefault(0.0);
+                kA.initDefault(0.0);
             }
         }
     }
@@ -67,24 +71,27 @@ public class Shooter extends SubsystemBase {
     private final ShooterIO io;
     private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
 
-    private final Debouncer primaryShooterMotorConnectedDebouncer = new Debouncer(0.5, Debouncer.DebounceType.kFalling);
-    private final Debouncer secondaryShooterMotorConnectedDebouncer = new Debouncer(0.5, Debouncer.DebounceType.kFalling);
-    private final Debouncer thirdShooterMotorConnectedDebouncer = new Debouncer(0.5, Debouncer.DebounceType.kFalling);
+    private final Debouncer motorConnectedDebouncer = new Debouncer(0.5, Debouncer.DebounceType.kFalling);
+    private final Debouncer readyDebouncer = new Debouncer(readyDebounceSeconds.get(), Debouncer.DebounceType.kFalling);
 
-    private final Alert primaryShooterMotorDisconnectedAlert = new Alert("Primary shooter motor disconnected!", AlertType.kError);
-    private final Alert secondaryShooterMotorDisconnectedAlert = new Alert("Secondary shooter motor disconnected!", AlertType.kError);
-    private final Alert thirdShooterMotorDisconnectedAlert = new Alert("Third shooter motor disconnected!", AlertType.kError);
+    private final Alert primaryShooterMotorDisconnectedAlert = new Alert("The primary shooter motor disconnected!", AlertType.kError);
+    private final Alert secondaryShooterMotorDisconnectedAlert = new Alert("The secondary shooter motor disconnected!", AlertType.kError);
+    private final Alert thirdShooterMotorDisconnectedAlert = new Alert("The third shooter motor disconnected!", AlertType.kError);
+    private final Alert fourthShooterMotorDisconnectedAlert = new Alert("The fourth shooter motor disconnected!", AlertType.kError);
+
+    private final Alert primaryShooterMotorTemperatureAlert = new Alert("The primary shooter motor disconnected!", AlertType.kWarning);
+    private final Alert secondaryShooterMotorTemperatureAlert = new Alert("The secondary shooter motor disconnected!", AlertType.kWarning);
+    private final Alert thirdShooterMotorTemperatureAlert = new Alert("The third shooter motor disconnected!", AlertType.kWarning);
+    private final Alert fourthShooterMotorTemperatureAlert = new Alert("The fourth shooter motor disconnected!", AlertType.kWarning);
 
     @AutoLogOutput(key = "Shooter/BrakeModeEnabled")
     private BooleanSupplier brakeModeEnabled = () -> false;
 
-    @Getter 
-    private ShooterGoal goal = ShooterGoal.IDLE;
-    private double appliedVoltage = 0.0;
+    @Getter private ShooterGoal goal = ShooterGoal.IDLE;
+    @Getter private ShooterState state = ShooterState.IDLE;
 
-    @Getter
-    @Accessors(fluent = true)
-    private boolean manualVoltageOverride = false;
+    @Getter private double voltageSetpoint = 0.0;
+    @Getter private double velocitySetpoint = 0.0;
 
     public Shooter(ShooterIO io) {
         this.io = io;
@@ -103,42 +110,75 @@ public class Shooter extends SubsystemBase {
             Logger.processInputs("Shooter", inputs);
         }
 
-        primaryShooterMotorDisconnectedAlert.set(!primaryShooterMotorConnectedDebouncer.calculate(inputs.isFirstShooterConnected) && !Robot.isJITing());
-        secondaryShooterMotorDisconnectedAlert.set(!secondaryShooterMotorConnectedDebouncer.calculate(inputs.isSecondShooterConnected) && !Robot.isJITing());
-        thirdShooterMotorDisconnectedAlert.set(!thirdShooterMotorConnectedDebouncer.calculate(inputs.isThirdShooterConnected) && !Robot.isJITing());
-    
-        switch (goal) {
-            case CLOSE, MEDIUM, FAR, IDLE -> appliedVoltage = goal.getVoltage();
-            case STOP -> appliedVoltage = 0.0;
+        if (kP.hasChanged(hashCode())) {
+            io.setPID(kP.get(), 0.0, 0.0);
         }
-        
-        io.setVoltage(appliedVoltage);
 
-        Logger.recordOutput("Shooter/AppliedVoltage", appliedVoltage);
-        Logger.recordOutput("Shooter/WantedVoltage", goal.getVoltage());
+        primaryShooterMotorDisconnectedAlert.set(!motorConnectedDebouncer.calculate(inputs.isFirstShooterConnected) && !Robot.isJITing());
+        secondaryShooterMotorDisconnectedAlert.set(!motorConnectedDebouncer.calculate(inputs.isSecondShooterConnected) && !Robot.isJITing());
+        thirdShooterMotorDisconnectedAlert.set(!motorConnectedDebouncer.calculate(inputs.isThirdShooterConnected) && !Robot.isJITing());
+        fourthShooterMotorDisconnectedAlert.set(!motorConnectedDebouncer.calculate(inputs.isFourthShooterConnected) && !Robot.isJITing());
 
-        LoggedTracer.record("ShooterPeriodicMS");
+        primaryShooterMotorTemperatureAlert.set(!inputs.isFirstShooterConnected);
+        secondaryShooterMotorTemperatureAlert.set(!inputs.isSecondShooterConnected);
+        thirdShooterMotorTemperatureAlert.set(!inputs.isThirdShooterConnected);
+        fourthShooterMotorTemperatureAlert.set(!inputs.isFourthShooterConnected);
+
+        state = handleStateTransition();
+        applyState();
+
+        LoggedTracer.record("ShooterPeriodic");
     }
 
-    public void setGoal(ShooterGoal goal) {
-        manualVoltageOverride = false;
-        
-        if(goal == this.goal) return;
-        this.goal = goal;
+    private ShooterState handleStateTransition() {
+        return switch (goal) {
+            case IDLE -> ShooterState.IDLE;
+            case VELOCITY -> {
+                if (Math.abs(inputs.firstShooterVelocity - velocitySetpoint) <= rpmTolerance.get()) yield ShooterState.AT_VELOCITY;
+                yield ShooterState.SPINNING_UP;
+            }
+            case VOLTAGE -> ShooterState.AT_VOLTAGE;
+            case REVERSE -> ShooterState.REVERSING;
+        };
     }
 
-    public void setBrakeMode(BooleanSupplier enabled) {
-        if (this.brakeModeEnabled.getAsBoolean() == enabled.getAsBoolean()) return;
-        this.brakeModeEnabled = enabled;
-        io.setBrakeMode(brakeModeEnabled.getAsBoolean());
+    private void applyState() {
+        switch (state) {
+            case IDLE -> io.stop();
+            case SPINNING_UP, AT_VELOCITY -> io.setVelocity(velocitySetpoint, Math.signum(velocitySetpoint) * kS.get() + velocitySetpoint * kV.get());
+            case AT_VOLTAGE -> io.setVoltage(voltageSetpoint);
+            case REVERSING -> io.setVelocity(velocitySetpoint, 0);
+        }
     }
 
-    public double getVelocity() {
-        return inputs.firstShooterVelocity;
+
+    public void runVelocity(double velocityRPM) {
+        goal = ShooterGoal.VELOCITY;
+        velocitySetpoint = velocityRPM;
     }
 
-    public void setManualVoltage(double voltage) {
-        manualVoltageOverride = true;
-        io.setVoltage(voltage);
+    public void runVoltage(double voltage) {
+        goal = ShooterGoal.VELOCITY;
+        voltageSetpoint = voltage;
+    }
+
+    public void reverse(double rpm) {
+        goal = ShooterGoal.REVERSE;
+        velocitySetpoint = -Math.abs(rpm);
+    }
+
+    public void stop() {
+        goal = ShooterGoal.IDLE;
+        velocitySetpoint = 0.0;
+        readyDebouncer.calculate(false);
+    }
+
+    public boolean atSetpoint() {
+        return state == ShooterState.AT_VELOCITY;
+    }
+
+    @AutoLogOutput(key="Shooter/AtSetpoint")
+    public boolean isReady() {
+        return readyDebouncer.calculate(atSetpoint());
     }
 }

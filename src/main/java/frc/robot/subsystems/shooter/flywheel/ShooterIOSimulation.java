@@ -48,13 +48,18 @@ public class ShooterIOSimulation implements ShooterIO {
 
         inputs.isSecondShooterConnected = true;
         inputs.secondShooterSupplyCurrentAmperes = shooterSimulation.getCurrentDrawAmps();
-        inputs.secondShooterTorqueCurrentAmperes = shooterGearbox.getCurrent(shooterSimulation.getAngularVelocityRadPerSec(), shooterAppliedVoltage);
         inputs.secondShooterTempuratureCelcius = 0.0;
+        inputs.secondShooterTempuratureFault = false;
 
         inputs.isThirdShooterConnected = true;
         inputs.thirdShooterSupplyCurrentAmperes = shooterSimulation.getCurrentDrawAmps();
-        inputs.thirdShooterTorqueCurrentAmperes = shooterGearbox.getCurrent(shooterSimulation.getAngularVelocityRadPerSec(), shooterAppliedVoltage);
         inputs.thirdShooterTempuratureCelcius = 0.0;
+        inputs.secondShooterTempuratureFault = false;
+
+        inputs.isFourthShooterConnected = true;
+        inputs.fourthShooterSupplyCurrentAmperes = shooterSimulation.getCurrentDrawAmps();
+        inputs.fourthShooterTempuratureCelcius = 0.0;
+        inputs.fourthShooterTempuratureFault = false;
     }
 
     @Override
