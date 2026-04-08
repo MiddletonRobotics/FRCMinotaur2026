@@ -175,10 +175,10 @@ public class HoodIOSimulation implements HoodIO {
     );
 
     public HoodIOSimulation() {
-        hoodGearbox = HoodConstants.kHoodSimulatedGearbox;
+        hoodGearbox = HoodConstants.kSimulatedGearbox;
         hoodSimulation = new SingleJointedArmSim(
             hoodGearbox,
-            HoodConstants.kHoodMotorReduction,
+            HoodConstants.kMotorReduction,
             HoodConstants.kHoodMOI.in(KilogramSquareMeters),
             HoodConstants.kHoodLength.in(Meters),
             HoodConstants.kHoodMinimumPosition.in(Radians),
@@ -195,12 +195,13 @@ public class HoodIOSimulation implements HoodIO {
         }
 
         inputs.isMotorConnected = true;
-        inputs.position = hoodSimulation.getAngleRads();
-        inputs.velocity = hoodSimulation.getVelocityRadPerSec();
-        inputs.acceleration = 0.0; 
+        inputs.positionRadians = hoodSimulation.getAngleRads();
+        inputs.velocityRadiansPerSecond = hoodSimulation.getVelocityRadPerSec();
         inputs.appliedVoltage = hoodAppliedVoltage;
+        inputs.torqueCurrentAmperes = hoodGearbox.getCurrent(hoodSimulation.getVelocityRadPerSec(), hoodAppliedVoltage);
         inputs.supplyCurrentAmperes = hoodSimulation.getCurrentDrawAmps();
-        inputs.tempuratureCelcius = 0.0; 
+        inputs.temperatureCelsius = 0.0; 
+        inputs.temperatureFault = false;
 
         Logger.recordOutput("Hood/Mechanism2d", mechanism);
         pivotLigament.setAngle(Math.toDegrees(hoodSimulation.getAngleRads()));
@@ -211,6 +212,19 @@ public class HoodIOSimulation implements HoodIO {
         hoodClosedLoop = false;
         hoodAppliedVoltage = MathUtility.clamp(voltage, -12.0, 12.0);
         hoodSimulation.setInputVoltage(hoodAppliedVoltage);
+    }
+
+    @Override
+    public void setOL(double amperes) {
+        setVoltage(hoodGearbox.getVoltage(
+            hoodGearbox.getTorque(amperes),
+            hoodSimulation.getVelocityRadPerSec()
+        ));
+    }
+
+    @Override
+    public void stop() {
+        setVoltage(0.0);
     }
 
     @Override
@@ -230,11 +244,6 @@ public class HoodIOSimulation implements HoodIO {
     @Override
     public void setPID(double kP, double kI, double kD) {
         hoodPositionController.setPID(kP, kI, kD);
-    }
-
-    @Override
-    public void stop() {
-        setVoltage(0.0);
     }
 
     @Override
