@@ -1,0 +1,76 @@
+<<<<<<< HEAD:src/main/deploy/pathplanner/autos/LeftSingleSwipeThenHang.auto
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LeftStartingToCenterCollect"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stop Intake Rollers"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shooter Open Loop Close-Mid"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Hood Minimum-Midpoint Position"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LeftCenterCollectToHang"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Index to Shooter"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+=======
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "NOP Killcode Right P1 "
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "NOP Killcode Right P2"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "Right",
+  "choreoAuto": false
+>>>>>>> 3163bf53965ccc6cde13a6cbacc44f3c0a1bd18b:src/main/deploy/pathplanner/autos/MMMA Counter Right.auto
+}

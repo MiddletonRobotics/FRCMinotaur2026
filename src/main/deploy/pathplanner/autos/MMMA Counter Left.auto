@@ -1,0 +1,76 @@
+<<<<<<< HEAD:src/main/deploy/pathplanner/autos/RightOutpostCollectThenHang.auto
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RightStartingToOutpostCollection"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 2.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shooter Open Loop Close-Mid"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Hood Minimum-Midpoint Position"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RightOutpostCollectionToHang"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Index to Shooter"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+=======
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "NOP killcode Left P1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "NOP killcode Left P2"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "Left",
+  "choreoAuto": false
+>>>>>>> 3163bf53965ccc6cde13a6cbacc44f3c0a1bd18b:src/main/deploy/pathplanner/autos/MMMA Counter Left.auto
+}

@@ -44,7 +44,7 @@ import frc.robot.subsystems.drivetrain.SimulationTunerConstants;
 public class DrivetrainConstants {
     public static final SwerveModuleType kSwerveModuleType = SwerveModuleType.MK4N_L2;
 
-    public static final LinearVelocity kMaximumLinearVelocity = MetersPerSecond.of(4.2);
+    public static final LinearVelocity kMaximumLinearVelocity = MetersPerSecond.of(4.4);
     public static final LinearAcceleration kMaximumLinearAcceleration = MetersPerSecondPerSecond.of(6.0);
     public static final AngularVelocity kMaximumRotationalVelocity = RadiansPerSecond.of(3 * Math.PI);
     public static final AngularAcceleration kMaximumRotationalAcceleration = RadiansPerSecondPerSecond.of(6 * Math.PI);
