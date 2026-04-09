@@ -9,6 +9,8 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -21,13 +23,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.minolib.advantagekit.LoggedTracer;
 import frc.minolib.advantagekit.LoggedTunableNumber;
 import frc.minolib.math.EqualsUtility;
+import frc.minolib.utilities.AllianceFlipUtility;
 import frc.minolib.utilities.SubsystemDataProcessor;
 import frc.robot.Robot;
+import frc.robot.constants.FieldConstants;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.ShooterConstants;
-<<<<<<< HEAD:src/main/java/frc/robot/subsystems/shooter/Shooter.java
-
-=======
+import frc.robot.subsystems.shooter.ShootingPreset;
 import frc.robot.subsystems.shooter.flywheel.ShooterIO.ShooterIOInputs;
 >>>>>>> 2ecad4c (moved shooter):src/main/java/frc/robot/subsystems/shooter/flywheel/Shooter.java
 import lombok.Getter;
@@ -44,6 +46,24 @@ public class Shooter extends SubsystemBase {
     private static final LoggedTunableNumber rpmTolerance = new LoggedTunableNumber("Shooter/RPMTolerance", 75.0);
     private static final LoggedTunableNumber readyDebounceSeconds = new LoggedTunableNumber("Shooter/ReadyDebounceSeconds", 0.10);
 
+    private static final ShootingPreset closePreset = new ShootingPreset(
+    new LoggedTunableNumber("Shooter/ShootingPreset/ClosePreset/HoodAngleDegrees", 12), 
+    new LoggedTunableNumber("Shooter/ShootingPreset/ClosePreset/FlywheelSpeedRPM", 2250), 
+    new LoggedTunableNumber("Shooter/ShootingPreset/ClosePreset/VoltageSetpoint", 5.5) 
+  );
+
+  private static final ShootingPreset mediumPreset = new ShootingPreset(
+    new LoggedTunableNumber("Shooter/ShootingPreset/MediumPreset/HoodAngleDegrees", 20), 
+    new LoggedTunableNumber("Shooter/ShootingPreset/MediumPreset/FlywheelSpeedRPM", 2700), 
+    new LoggedTunableNumber("Shooter/ShootingPreset/MediumPreset/VoltageSetpoint", 6.5) 
+  );
+
+  private static final ShootingPreset farPreset = new ShootingPreset(
+    new LoggedTunableNumber("Shooter/ShootingPreset/FarPreset/HoodAngleDegrees", 27), 
+    new LoggedTunableNumber("Shooter/ShootingPreset/FarPreset/FlywheelSpeedRPM", 3300), 
+    new LoggedTunableNumber("Shooter/ShootingPreset/FarPreset/VoltageSetpoint", 7.5) 
+  );
+
     public enum ShooterGoal {
         IDLE,
         VELOCITY,
@@ -57,6 +77,22 @@ public class Shooter extends SubsystemBase {
         AT_VELOCITY,
         AT_VOLTAGE,
         REVERSING
+    }
+
+    public enum SelectedShootingPreset {
+        CLOSE(closePreset),
+        MEDIUM(mediumPreset),
+        FAR(farPreset);
+
+        public ShootingPreset shootingPreset;
+
+        private SelectedShootingPreset(ShootingPreset shootingPreset) {
+            this.shootingPreset = shootingPreset;
+        }
+
+        public ShootingPreset getData() {
+            return shootingPreset;
+        }
     }
 
     static {
@@ -99,6 +135,7 @@ public class Shooter extends SubsystemBase {
 
     @Getter private ShooterGoal goal = ShooterGoal.IDLE;
     @Getter private ShooterState state = ShooterState.IDLE;
+    @Getter private SelectedShootingPreset preset = SelectedShootingPreset.CLOSE;
 
     @Getter private double voltageSetpoint = 0.0;
     @Getter private double velocitySetpoint = 0.0;
@@ -172,6 +209,19 @@ public class Shooter extends SubsystemBase {
         }
     }
 
+    public Translation2d getHubCenter(boolean isRed) {
+        Translation2d blueHubCenter = FieldConstants.Hub.topCenterPoint.toTranslation2d();
+
+        if (isRed) {
+            return new Translation2d(FieldConstants.fieldLength - blueHubCenter.getX(), blueHubCenter.getY());
+        }
+
+        return blueHubCenter;
+    }
+
+    public void setShootingPreset(SelectedShootingPreset selectedShootingPreset) {
+        this.preset = selectedShootingPreset;
+    }
 
     public void runVelocity(double velocityRPM) {
         goal = ShooterGoal.VELOCITY;
@@ -179,7 +229,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public void runVoltage(double voltage) {
-        goal = ShooterGoal.VELOCITY;
+        goal = ShooterGoal.VOLTAGE;
         voltageSetpoint = voltage;
     }
 
