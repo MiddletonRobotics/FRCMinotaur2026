@@ -9,11 +9,14 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import java.util.function.Consumer;
+import java.util.function.DoubleSupplier;
 import java.util.zip.ZipEntry;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.events.EventTrigger;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -21,9 +24,11 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-
+import frc.minolib.advantagekit.LoggedTunableNumber;
 import frc.minolib.localization.WeightedPoseEstimate;
 import frc.robot.command_factories.DrivetrainFactory;
 import frc.robot.command_factories.IntakeFactory;
@@ -42,9 +47,11 @@ import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorIOHardware;
 import frc.robot.subsystems.rollers.RollerSystemIOSimulation;
 import frc.robot.subsystems.rollers.RollerSystemIOHardware;
+import frc.robot.subsystems.shooter.ShootingPreset;
 import frc.robot.subsystems.shooter.flywheel.Shooter;
 import frc.robot.subsystems.shooter.flywheel.ShooterIOHardware;
 import frc.robot.subsystems.shooter.flywheel.ShooterIOSimulation;
+import frc.robot.subsystems.shooter.flywheel.Shooter.SelectedShootingPreset;
 import frc.robot.subsystems.shooter.hood.Hood;
 import frc.robot.subsystems.shooter.hood.HoodIOHardware;
 import frc.robot.subsystems.shooter.hood.HoodIOSimulation;
@@ -208,6 +215,8 @@ public class RobotContainer {
     hood = buildHood();
     elevator = buildElevator();
 
+    configureNamedCommands();
+
     autoRegistry = new LoggedDashboardChooser<Command>("Auton Choices", AutoBuilder.buildAutoChooser());
     autoRegistry.addOption("Drivetrain Translation Dynamic Forward", drivetrain.sysIdDynamic(Drivetrain.SysIdMechanism.SWERVE_TRANSLATION, Direction.kForward));
     autoRegistry.addOption("Drivetrain Translation Dynamic Reverse", drivetrain.sysIdDynamic(Drivetrain.SysIdMechanism.SWERVE_TRANSLATION, Direction.kReverse));
@@ -218,6 +227,82 @@ public class RobotContainer {
     configureDefaultCommands();
     configureDriverBindings();
     configureOperatorBindings();
+  }
+
+  private void configureNamedCommands() {
+    NamedCommands.registerCommand(
+      "Shooting OL Sequence Close", 
+      Commands.runOnce(() -> shooter.setShootingPreset(SelectedShootingPreset.CLOSE)).andThen(
+        Commands.parallel(
+          Commands.sequence(
+            Commands.waitSeconds(1),
+            Commands.runEnd(
+              () -> tower.setTowerGoal(TowerGoal.FEED), 
+              () -> tower.setTowerGoal(TowerGoal.STOP), 
+              tower
+            )
+          ),
+          Commands.runEnd(
+            () -> shooter.runVoltage(shooter.getPreset().getData().getVoltageSetpoint()), 
+            () -> shooter.stop(),
+            shooter
+          ),
+          Commands.runEnd(
+              () -> indexer.setGoal(IndexerGoal.FEED), 
+              () -> indexer.setGoal(IndexerGoal.STOP), 
+              indexer
+          ),
+          Commands.runEnd(
+            () -> hood.setAngle(shooter.getPreset().getData().getHoodAngleDegrees()), 
+            () -> hood.setAngle(shooter.getPreset().getData().getHoodAngleDegrees()), 
+            hood
+          )
+        ).raceWith(
+          new WaitCommand(4)
+        )
+      )
+    );
+
+    NamedCommands.registerCommand(
+      "Shooting OL Sequence Medium", 
+      Commands.runOnce(() -> shooter.setShootingPreset(SelectedShootingPreset.MEDIUM)).andThen(
+        Commands.parallel(
+          Commands.sequence(
+            Commands.waitSeconds(1),
+            Commands.runEnd(
+              () -> tower.setTowerGoal(TowerGoal.FEED), 
+              () -> tower.setTowerGoal(TowerGoal.STOP), 
+              tower
+            )
+          ),
+          Commands.runEnd(
+            () -> shooter.runVoltage(shooter.getPreset().getData().getVoltageSetpoint()), 
+            () -> shooter.stop(),
+            shooter
+          ),
+          Commands.runEnd(
+              () -> indexer.setGoal(IndexerGoal.FEED), 
+              () -> indexer.setGoal(IndexerGoal.STOP), 
+              indexer
+          ),
+          Commands.runEnd(
+            () -> hood.setAngle(shooter.getPreset().getData().getHoodAngleDegrees()), 
+            () -> hood.setAngle(shooter.getPreset().getData().getHoodAngleDegrees()), 
+            hood
+          )
+        ).raceWith(
+          new WaitCommand(4)
+        )
+      )
+    );
+
+    new EventTrigger("Deploy and Intake")
+      .onTrue(IntakeFactory.intakeCommand(this)
+      );
+
+    new EventTrigger("Deploy Half and Stop Intaking")
+      .onTrue(IntakeFactory.intakeCommand(this)
+      );
   }
 
   private void configureDefaultCommands() {
@@ -249,7 +334,7 @@ public class RobotContainer {
       .whileTrue(
         Commands.parallel(
           Commands.sequence(
-            Commands.waitSeconds(0.75),
+            Commands.waitSeconds(1),
             Commands.runEnd(
               () -> tower.setTowerGoal(TowerGoal.FEED), 
               () -> tower.setTowerGoal(TowerGoal.STOP), 
@@ -257,7 +342,7 @@ public class RobotContainer {
             )
           ),
           Commands.runEnd(
-            () -> shooter.runVelocity(2500), 
+            () -> shooter.runVoltage(shooter.getPreset().getData().getVoltageSetpoint()), 
             () -> shooter.stop(),
             shooter
           ),
@@ -273,6 +358,24 @@ public class RobotContainer {
           )
         )
       );
+
+      controlboard
+        .automaticallyAim()
+        .whileTrue(
+          DrivetrainFactory.autoAim(drivetrain, robotState, () -> shooter.getHubCenter(robotState.isRedAlliance()), () -> 0, () -> 0)
+        );
+
+      controlboard
+        .automaticallyHang()
+        .whileTrue(
+          DrivetrainFactory.driveToPoint(
+            drivetrain, 
+            robotState, 
+            () -> new Pose2d(1, 2.8, new Rotation2d(Math.PI)), 
+            DrivetrainConstants.kMaximumLinearVelocity.in(MetersPerSecond), 
+            DrivetrainConstants.kMaximumRotationalVelocity.in(RadiansPerSecond)
+          )
+        );
   }
 
   public void updateOnboardAlerts() {
@@ -281,7 +384,17 @@ public class RobotContainer {
   }
 
   private void configureOperatorBindings() {
-   
+   controlboard
+      .selectCloseShootingPreset()
+      .onTrue(Commands.runOnce(() -> shooter.setShootingPreset(SelectedShootingPreset.CLOSE)));
+
+    controlboard
+      .selectMediumShootingPreset()
+      .onTrue(Commands.runOnce(() -> shooter.setShootingPreset(SelectedShootingPreset.MEDIUM)));
+
+    controlboard
+      .selectFarShootingPreset()
+      .onTrue(Commands.runOnce(() -> shooter.setShootingPreset(SelectedShootingPreset.FAR)));
   }
 
   public Command getAutonomousCommand() {
