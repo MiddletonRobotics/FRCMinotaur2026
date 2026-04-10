@@ -174,6 +174,10 @@ public class Hood extends SubsystemBase {
         }
     }
 
+    public void setBrakeMode(BooleanSupplier enabled) {
+        io.setBrakeMode(enabled.getAsBoolean());
+    }
+
     public void setGoal(HoodGoal goal) {
         this.goal = goal;
     }

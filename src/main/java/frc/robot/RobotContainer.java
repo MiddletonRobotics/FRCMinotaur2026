@@ -10,8 +10,6 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.DoubleSupplier;
-import java.util.zip.ZipEntry;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -27,12 +25,11 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.minolib.advantagekit.LoggedTunableNumber;
+
 import frc.minolib.controller.driverstation.OperatorButtonBoard;
 import frc.minolib.localization.WeightedPoseEstimate;
 import frc.robot.command_factories.DrivetrainFactory;
@@ -42,7 +39,6 @@ import frc.robot.constants.DrivetrainConstants;
 import frc.robot.constants.IndexerConstants;
 import frc.robot.constants.IntakeConstants;
 import frc.robot.constants.TowerConstants;
-import frc.robot.constants.VisionConstants;
 import frc.robot.io.Controlboard;
 import frc.robot.subsystems.drivetrain.CompetitionTunerConstants;
 import frc.robot.subsystems.drivetrain.Drivetrain;
@@ -53,7 +49,6 @@ import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorIOHardware;
 import frc.robot.subsystems.rollers.RollerSystemIOSimulation;
 import frc.robot.subsystems.rollers.RollerSystemIOHardware;
-import frc.robot.subsystems.shooter.ShootingPreset;
 import frc.robot.subsystems.shooter.flywheel.Shooter;
 import frc.robot.subsystems.shooter.flywheel.ShooterIOHardware;
 import frc.robot.subsystems.shooter.flywheel.ShooterIOSimulation;
@@ -61,7 +56,6 @@ import frc.robot.subsystems.shooter.flywheel.Shooter.SelectedShootingPreset;
 import frc.robot.subsystems.shooter.hood.Hood;
 import frc.robot.subsystems.shooter.hood.HoodIOHardware;
 import frc.robot.subsystems.shooter.hood.HoodIOSimulation;
-import frc.robot.subsystems.shooter.hood.Hood.HoodGoal;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.Indexer.IndexerGoal;
 import frc.robot.subsystems.intake.Intake;
@@ -69,9 +63,6 @@ import frc.robot.subsystems.intake.slam.SlamIOSimulation;
 import frc.robot.subsystems.intake.slam.SlamIOHardware;
 import frc.robot.subsystems.tower.Tower;
 import frc.robot.subsystems.tower.Tower.TowerGoal;
-import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.VisionIOPhotonVision;
-import frc.robot.subsystems.vision.VisionIOSimulation;
 import frc.robot.utilities.HubShiftUtility;
 
 public class RobotContainer {
@@ -100,7 +91,7 @@ public class RobotContainer {
   private final Trigger coast = primaryButtonBoard.spstSwitch(10);
   private final Trigger disableAutoShooter = primaryButtonBoard.spstSwitch(9);
   private final Trigger wonAutoOverride = primaryButtonBoard.spstSwitch(8);
-  private final Trigger lostAutoOverride = primaryButtonBoard.spstSwitch(8);
+  private final Trigger lostAutoOverride = primaryButtonBoard.spstSwitch(7);
 
   private final LoggedDashboardChooser<Command> autoRegistry;
 
@@ -108,7 +99,8 @@ public class RobotContainer {
   private final Alert operatorControllerDisconnected = new Alert("Secondary controller disconnected (port 1).", AlertType.kWarning);
   private final Alert primaryButtonBoardDisconnected = new Alert("Primary Button Board disconnected (port 2).", AlertType.kWarning);
   private final Alert secondaryButtonBoardDisconnected = new Alert("Primary Button Board disconnected (port 2).", AlertType.kWarning);
-  private final Alert autoWinnerNotSet = new Alert("Winner of Autonomous has not been set", AlertType.kError);
+
+  private boolean coastOverride = false;
 
   private Drivetrain buildDrivetrain() {
     if(Robot.isSimulation()) {
@@ -220,6 +212,12 @@ public class RobotContainer {
     hood = buildHood();
     elevator = buildElevator();
 
+    intake.setBrakeMode(() -> !coastOverride);
+    indexer.setBrakeMode(() -> !coastOverride);
+    tower.setBrakeMode(() -> !coastOverride);
+    shooter.setBrakeMode(() -> !coastOverride);
+    elevator.setBrakeMode(() -> !coastOverride);
+
     HubShiftUtility.setAllianceWinOverride(() -> {
       if (lostAutoOverride.getAsBoolean()) {
         return Optional.of(false);
@@ -271,7 +269,7 @@ public class RobotContainer {
           ),
           Commands.runEnd(
             () -> hood.setAngle(shooter.getPreset().getData().getHoodAngleDegrees()), 
-            () -> hood.setAngle(shooter.getPreset().getData().getHoodAngleDegrees()), 
+            () -> hood.setAngle(12.0), 
             hood
           )
         ).raceWith(
@@ -304,7 +302,7 @@ public class RobotContainer {
           ),
           Commands.runEnd(
             () -> hood.setAngle(shooter.getPreset().getData().getHoodAngleDegrees()), 
-            () -> hood.setAngle(shooter.getPreset().getData().getHoodAngleDegrees()), 
+            () -> hood.setAngle(12.0), 
             hood
           )
         ).raceWith(
@@ -328,7 +326,7 @@ public class RobotContainer {
       robotState, 
       () -> controlboard.getThrottle(), 
       () -> controlboard.getStrafe(), 
-      () -> controlboard.getRotation(), 
+      () -> controlboard.getRotation(),
       true
     ));
   }
@@ -369,8 +367,8 @@ public class RobotContainer {
               indexer
           ),
           Commands.runEnd(
-            () -> hood.setAngle(20), 
-            () -> hood.setAngle(10), 
+            () -> hood.setAngle(shooter.getPreset().getData().getHoodAngleDegrees()), //TODO: Change this later before the practice field, 
+            () -> hood.setAngle(12), 
             hood
           )
         )
@@ -453,6 +451,20 @@ public class RobotContainer {
         () -> elevator.runVoltage(0), 
         elevator
       ));
+
+      coast
+        .onTrue(Commands.runOnce(() -> {
+          if (DriverStation.isDisabled()) {
+            coastOverride = true;
+          }
+        })
+        .withName("Subsystem Coast")
+        .ignoringDisable(true))
+        .onFalse(Commands.runOnce(() -> {
+          coastOverride = false;
+        })
+        .withName("Subsystem Uncoast")
+        .ignoringDisable(true));
   }
 
   public Command getAutonomousCommand() {

@@ -7,31 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "LeftSingleSwipe"
+            "pathName": "SinkThatShipRight"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "LeftSingleShoot"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shooting OL Sequence Medium"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "LeftSecondSwipe"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "LeftSecondShoot"
+            "pathName": "RightShoot"
           }
         },
         {

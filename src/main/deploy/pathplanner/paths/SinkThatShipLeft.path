@@ -16,16 +16,16 @@
     },
     {
       "anchor": {
-        "x": 8.347955555558572,
-        "y": 6.831655555560649
+        "x": 8.515834522111268,
+        "y": 6.771526390870186
       },
       "prevControl": {
-        "x": 8.153066666669682,
-        "y": 7.543000000005092
+        "x": 8.295553716909328,
+        "y": 7.707673973683289
       },
       "nextControl": {
-        "x": 8.661618317944823,
-        "y": 5.686786472850843
+        "x": 8.787730385012452,
+        "y": 5.616025553661582
       },
       "isLocked": false,
       "linkedName": null
@@ -71,14 +71,14 @@
   "eventMarkers": [
     {
       "name": "Deploy and Intake",
-      "waypointRelativePos": 0.2362204724409407,
+      "waypointRelativePos": 0.20922384701911875,
       "endWaypointRelativePos": null,
       "command": null
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 4.0,
-    "maxAcceleration": 4.5,
+    "maxVelocity": 4.5,
+    "maxAcceleration": 6.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,

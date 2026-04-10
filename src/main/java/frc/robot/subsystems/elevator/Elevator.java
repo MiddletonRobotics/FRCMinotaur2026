@@ -2,6 +2,7 @@ package frc.robot.subsystems.elevator;
 
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -189,6 +190,10 @@ public class Elevator extends SubsystemBase {
             }
             case MANUAL -> io.setVoltage(voltageSetpoint);
         }
+    }
+
+    public void setBrakeMode(BooleanSupplier enabled) {
+        io.setBrakeMode(enabled.getAsBoolean());
     }
 
     public void setGoal(ElevatorGoal goal) {

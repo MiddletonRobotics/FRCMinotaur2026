@@ -48,8 +48,8 @@ public class Shooter extends SubsystemBase {
     );
 
     private static final ShootingPreset closeMediumPreset = new ShootingPreset(
-        new LoggedTunableNumber("Shooter/ShootingPreset/MediumPreset/HoodAngleDegrees", 18), 
-        new LoggedTunableNumber("Shooter/ShootingPreset/MediumPreset/FlywheelSpeedRPM", 2000), 
+        new LoggedTunableNumber("Shooter/ShootingPreset/MediumPreset/HoodAngleDegrees", 20), 
+        new LoggedTunableNumber("Shooter/ShootingPreset/MediumPreset/FlywheelSpeedRPM", 2250), 
         new LoggedTunableNumber("Shooter/ShootingPreset/MediumPreset/VoltageSetpoint", 6.5) 
     );
 
@@ -200,6 +200,10 @@ public class Shooter extends SubsystemBase {
             case AT_VOLTAGE -> io.setVoltage(voltageSetpoint);
             case REVERSING -> io.setVelocity(velocitySetpoint, 0);
         }
+    }
+
+    public void setBrakeMode(BooleanSupplier enabled) {
+        io.setBrakeMode(enabled.getAsBoolean());
     }
 
     public Translation2d getHubCenter(boolean isRed) {

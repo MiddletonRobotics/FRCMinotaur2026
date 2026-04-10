@@ -3,6 +3,8 @@ package frc.robot.subsystems.intake;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
 
+import java.util.function.BooleanSupplier;
+
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.filter.Debouncer;
@@ -13,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.minolib.advantagekit.LoggedTracer;
 import frc.minolib.advantagekit.LoggedTunableNumber;
+import frc.robot.Robot;
 import frc.robot.constants.IntakeConstants;
 import frc.robot.subsystems.intake.slam.Slam;
 import frc.robot.subsystems.intake.slam.SlamIO;
@@ -24,7 +27,7 @@ import lombok.Getter;
 public class Intake extends SubsystemBase {
     private static final LoggedTunableNumber kStowedPosition = new LoggedTunableNumber("Intake/Slam/StowedPosition", 56.9);
     private static final LoggedTunableNumber kDeployedPosition = new LoggedTunableNumber("Intake/Slam/DeployedPosition", 187.4);
-    private static final LoggedTunableNumber kHalfDeployPosition = new LoggedTunableNumber("Intake/Slam/HalfPosition", 120.0);
+    private static final LoggedTunableNumber kHalfDeployPosition = new LoggedTunableNumber("Intake/Slam/HalfPosition", 110.0);
     private static final LoggedTunableNumber kFeedPosition = new LoggedTunableNumber("Intake/Slam/FeedPosition", 140.0);
     private static final LoggedTunableNumber kRollerVoltage = new LoggedTunableNumber("Intake/Roller/IntakeVoltage", 10.0);
     private static final LoggedTunableNumber kExhaustVoltage = new LoggedTunableNumber("Intake/Roller/ExhaustVoltage", -6.0);
@@ -143,5 +146,10 @@ public class Intake extends SubsystemBase {
 
     public void setGoal(IntakeGoal goal) {
         this.goal = goal;
+    }
+
+    public void setBrakeMode(BooleanSupplier enabled) {
+        slam.setBrakeMode(enabled.getAsBoolean());
+        roller.setBrakeMode(enabled.getAsBoolean());
     }
 }

@@ -92,4 +92,9 @@ public class Indexer extends SubsystemBase {
         leftRoller.setVoltage(rollerVoltage);
         rightRoller.setVoltage(rollerVoltage);
     }
+
+    public void setBrakeMode(BooleanSupplier enabled) {
+        leftRoller.setBrakeMode(enabled.getAsBoolean());
+        rightRoller.setBrakeMode(enabled.getAsBoolean());
+    }
 }
