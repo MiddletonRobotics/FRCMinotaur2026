@@ -8,7 +8,6 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
-import edu.wpi.first.wpilibj.Timer;
 import frc.minolib.io.CANBusInputsAutoLogged;
 import frc.robot.constants.GlobalConstants;
 

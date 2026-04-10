@@ -100,4 +100,9 @@ public class Tower extends SubsystemBase {
 
         LoggedTracer.record("TowerPeriodic");
     }
+
+    public void setBrakeMode(BooleanSupplier enabled) {
+        topRoller.setBrakeMode(enabled.getAsBoolean());
+        bottomRoller.setBrakeMode(enabled.getAsBoolean());
+    }
 }
