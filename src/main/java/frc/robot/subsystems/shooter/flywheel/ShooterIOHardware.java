@@ -160,7 +160,7 @@ public class ShooterIOHardware implements ShooterIO {
     @Override
     public void updateInputs(ShooterIOInputs inputs) {
         inputs.firstShooterPosition = firstShooterPosition.getValue().in(Rotations);
-        inputs.firstShooterVelocity = firstShooterVelocity.getValue().in(RotationsPerSecond);
+        inputs.firstShooterVelocity = firstShooterVelocity.getValue().in(RotationsPerSecond) * 60;
         inputs.firstShooterAppliedVoltage = firstShooterAppliedVoltage.getValue().in(Volts);
         inputs.firstShooterSupplyCurrentAmperes = firstShooterSupplyCurrent.getValue().in(Amps);
         inputs.firstShooterTorqueCurrentAmperes = firstShooterTorqueCurrent.getValue().in(Amps);
@@ -219,7 +219,7 @@ public class ShooterIOHardware implements ShooterIO {
     public void setVelocity(double velocity, double feedforward) {
         firstShooterMotor.setControl(
             velocityRequest
-                .withVelocity(velocity)
+                .withVelocity(velocity / 60)
                 .withFeedForward(feedforward)
                 .withEnableFOC(true)
         );

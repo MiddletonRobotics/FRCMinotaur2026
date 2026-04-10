@@ -128,6 +128,9 @@ public class Hood extends SubsystemBase {
 
         state = handleStateTransition();
         applyState();
+
+        Logger.recordOutput("Hood/Goal", goal.toString());
+        Logger.recordOutput("Hood/State", state.toString());
         
         LoggedTracer.record("HoodPeriodic");
     }
@@ -159,7 +162,7 @@ public class Hood extends SubsystemBase {
                 io.setPosition(
                     MathUtil.clamp(
                         Units.degreesToRadians(targetDegrees), 
-                        Units.degreesToRadians(kMaximumAngleDegrees.get()), 
+                        Units.degreesToRadians(kMinimumAngleDegrees.get()), 
                         Units.degreesToRadians(kMaximumAngleDegrees.get())
                     ), 
                     0.0
