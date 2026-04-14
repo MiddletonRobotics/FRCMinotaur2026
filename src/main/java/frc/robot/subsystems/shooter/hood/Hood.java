@@ -44,8 +44,6 @@ public class Hood extends SubsystemBase {
     private static final LoggedTunableNumber readyDebounceSeconds = new LoggedTunableNumber("Hood/ReadyDebounceSeconds", 0.08);
 
     private static final LoggedTunableNumber kHomingVoltage = new LoggedTunableNumber("Hood/HomingVoltage", -3.0);
-    private static final LoggedTunableNumber kHomingTimeoutSeconds = new LoggedTunableNumber("Hood/HomingTimeSeconds", 0.4);
-    private static final LoggedTunableNumber kHomingVelocityThreshold = new LoggedTunableNumber("Hood/HomingVelocityThreshold", 0.1);
 
     public enum HoodGoal {
         IDLE,
@@ -74,6 +72,12 @@ public class Hood extends SubsystemBase {
             }
 
             case SIMBOT -> {
+                kP.initDefault(0.0);
+                kD.initDefault(0.0);
+                kS.initDefault(0.0);
+                kV.initDefault(0.0);
+                kG.initDefault(0.0);
+                kA.initDefault(0.0);
                 kP.initDefault(0.0);
                 kD.initDefault(0.0);
                 kS.initDefault(0.0);
@@ -115,6 +119,7 @@ public class Hood extends SubsystemBase {
         }
     
         motorDisconnectedAlert.set(!motorConnectedDebouncer.calculate(inputs.isMotorConnected) && !Robot.isJITing());
+        motorOverheatingAlert.set(inputs.temperatureFault);
         motorOverheatingAlert.set(inputs.temperatureFault);
 
         // Update tunable numbers

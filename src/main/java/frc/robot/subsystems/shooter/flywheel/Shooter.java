@@ -11,6 +11,8 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -24,11 +26,14 @@ import frc.minolib.advantagekit.LoggedTracer;
 import frc.minolib.advantagekit.LoggedTunableNumber;
 import frc.minolib.math.EqualsUtility;
 import frc.minolib.utilities.AllianceFlipUtility;
+import frc.minolib.utilities.AllianceFlipUtility;
 import frc.minolib.utilities.SubsystemDataProcessor;
 import frc.robot.Robot;
 import frc.robot.constants.FieldConstants;
+import frc.robot.constants.FieldConstants;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.ShooterConstants;
+import frc.robot.subsystems.shooter.ShootingPreset;
 import frc.robot.subsystems.shooter.ShootingPreset;
 import frc.robot.subsystems.shooter.flywheel.ShooterIO.ShooterIOInputs;
 
@@ -184,6 +189,10 @@ public class Shooter extends SubsystemBase {
         Logger.recordOutput("Shooter/State", state.toString());
         Logger.recordOutput("Shooter/ShootingPreset", preset.toString());
 
+        Logger.recordOutput("Shooter/Goal", goal.toString());
+        Logger.recordOutput("Shooter/State", state.toString());
+        Logger.recordOutput("Shooter/ShootingPreset", preset.toString());
+
         LoggedTracer.record("ShooterPeriodic");
     }
 
@@ -244,6 +253,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public void runVoltage(double voltage) {
+        goal = ShooterGoal.VOLTAGE;
         goal = ShooterGoal.VOLTAGE;
         voltageSetpoint = voltage;
     }
