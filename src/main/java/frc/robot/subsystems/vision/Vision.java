@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -34,6 +35,7 @@ public class Vision extends SubsystemBase {
     private final Alert[] disconnectedAlerts;
 
     List<WeightedPoseEstimate> allPoseEstimates = new ArrayList<>();
+    double visionConfidence = 0.0;
 
     public Vision(RobotState robotState, VisionIO... io) {
         this.robotState = robotState;
@@ -133,17 +135,20 @@ public class Vision extends SubsystemBase {
         Logger.recordOutput("Vision/Summary/RobotPosesAccepted", allRobotPosesAccepted.toArray(new Pose3d[0]));
         Logger.recordOutput("Vision/Summary/RobotPosesRejected", allRobotPosesRejected.toArray(new Pose3d[0]));
 
+        List<WeightedPoseEstimate> acceptedThisCycle = new ArrayList<>();
         Map<Double, List<WeightedPoseEstimate>> grouped = groupByTimestamp(allPoseEstimates, 0.02);
-    
+
         for (var group : grouped.values()) {
-            if (group.size() == 1) {
-                var obs = group.get(0);
-                robotState.updateVisionPoseEstimate(obs);
-            } else {
-                var fused = fuseObservations(group);
-                robotState.updateVisionPoseEstimate(fused);
-            }
+            WeightedPoseEstimate fused = group.size() == 1 ? group.get(0) : fuseObservations(group);
+
+            acceptedThisCycle.add(fused);
+            robotState.updateVisionPoseEstimate(fused);
         }
+
+        computeVisionConfidence(acceptedThisCycle);
+        robotState.setVisionConfidence(visionConfidence);
+
+        Logger.recordOutput("Vision/Confidence", visionConfidence);
     }
 
     private Map<Double, List<WeightedPoseEstimate>> groupByTimestamp(List<WeightedPoseEstimate> observations, double tolerance) {
@@ -158,10 +163,6 @@ public class Vision extends SubsystemBase {
     }
 
     private WeightedPoseEstimate fuseObservations(List<WeightedPoseEstimate> observations) {
-        if (observations.isEmpty()) {
-            //continue;
-        }
-        
         if (observations.size() == 1) {
             return observations.get(0);
         }
@@ -282,6 +283,32 @@ public class Vision extends SubsystemBase {
             fusedStdDevs,
             totalTags
         );
+    }
+
+    private void computeVisionConfidence(List<WeightedPoseEstimate> acceptedEstimates) {
+        if (acceptedEstimates.isEmpty()) {
+            // No accepted observations this cycle — decay toward zero
+            visionConfidence = Math.max(0.0, visionConfidence - 0.05);
+            return;
+        }
+
+        double totalConfidence = 0.0;
+        double totalWeight = 0.0;
+
+        for (var estimate : acceptedEstimates) {
+            double tagFactor = Math.min(estimate.getNumTags() / 3.0, 1.0);
+            double xStdDev = estimate.getVisionMeasurementStdDevs().get(0, 0);
+            double distanceFactor = MathUtil.clamp(1.0 - (xStdDev / VisionConstants.linearStdDevBaseline) * 0.1, 0.0, 1.0);
+            double observationConfidence = 0.6 * tagFactor + 0.4 * distanceFactor;
+
+            totalConfidence += observationConfidence * estimate.getNumTags();
+            totalWeight += estimate.getNumTags();
+        }
+
+        double rawConfidence = totalWeight > 0 ? totalConfidence / totalWeight : 0.0;
+
+        visionConfidence = 0.8 * visionConfidence + 0.2 * rawConfidence;
+        visionConfidence = MathUtil.clamp(visionConfidence, 0.0, 1.0);
     }
 
     @FunctionalInterface
