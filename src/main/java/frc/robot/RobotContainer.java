@@ -11,6 +11,9 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -36,9 +39,12 @@ import frc.robot.command_factories.DrivetrainFactory;
 import frc.robot.command_factories.IntakeFactory;
 import frc.robot.constants.ControllerConstants;
 import frc.robot.constants.DrivetrainConstants;
+import frc.robot.constants.GlobalConstants;
+import frc.robot.constants.GlobalConstants.Mode;
 import frc.robot.constants.IndexerConstants;
 import frc.robot.constants.IntakeConstants;
 import frc.robot.constants.TowerConstants;
+import frc.robot.constants.VisionConstants;
 import frc.robot.io.Controlboard;
 import frc.robot.subsystems.drivetrain.CompetitionTunerConstants;
 import frc.robot.subsystems.drivetrain.Drivetrain;
@@ -63,6 +69,9 @@ import frc.robot.subsystems.intake.slam.SlamIOSimulation;
 import frc.robot.subsystems.intake.slam.SlamIOHardware;
 import frc.robot.subsystems.tower.Tower;
 import frc.robot.subsystems.tower.Tower.TowerGoal;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionIOPhotonVision;
+import frc.robot.subsystems.vision.VisionIOSimulation;
 import frc.robot.utilities.HubShiftUtility;
 
 public class RobotContainer {
@@ -81,6 +90,9 @@ public class RobotContainer {
   private Shooter shooter;
   private Hood hood;
   private Elevator elevator;
+  private Vision vision;
+
+  private SwerveDriveSimulation driveSimulation = null;
 
   private Controlboard controlboard = Controlboard.getInstance();
   private final OperatorButtonBoard primaryButtonBoard = new OperatorButtonBoard(ControllerConstants.kDriverControllerPort);
@@ -104,6 +116,9 @@ public class RobotContainer {
 
   private Drivetrain buildDrivetrain() {
     if(Robot.isSimulation()) {
+      this.driveSimulation = new SwerveDriveSimulation(DrivetrainConstants.kMapleSimConfiguration, new Pose2d(3, 3, new Rotation2d()));
+      SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
+
       return new Drivetrain(
         new DrivetrainIOSimulation(robotState, DrivetrainConstants.kDrivetrain.getDriveTrainConstants(), SimulationTunerConstants.kFrontLeft, SimulationTunerConstants.kFrontRight, SimulationTunerConstants.kBackLeft, SimulationTunerConstants.kBackRight), 
         robotState
@@ -195,6 +210,22 @@ public class RobotContainer {
     }
   }
 
+  private Vision buildVision() {
+    if(Robot.isSimulation()) {
+      return new Vision(
+        robotState, 
+        new VisionIOSimulation(VisionConstants.kBackLeftConfiguration, VisionConstants.kAprilTagLayout, robotState),
+        new VisionIOSimulation(VisionConstants.kBackRightConfiguration, VisionConstants.kAprilTagLayout, robotState)
+      );
+    } else {
+      return new Vision(
+        robotState, 
+        new VisionIOPhotonVision(VisionConstants.kBackLeftConfiguration, VisionConstants.kAprilTagLayout),
+        new VisionIOPhotonVision(VisionConstants.kBackRightConfiguration, VisionConstants.kAprilTagLayout)
+      );
+    }
+  }
+
   public Drivetrain getDrivetrain() {
     return drivetrain;
   }
@@ -211,6 +242,7 @@ public class RobotContainer {
     shooter = buildShooter();
     hood = buildHood();
     elevator = buildElevator();
+    vision = buildVision();
 
     intake.setBrakeMode(() -> !coastOverride);
     indexer.setBrakeMode(() -> !coastOverride);
@@ -467,6 +499,21 @@ public class RobotContainer {
         })
         .withName("Subsystem Uncoast")
         .ignoringDisable(true));
+  }
+
+  public void resetSimulationField() {
+    if (GlobalConstants.getMode() != Mode.SIM) return;
+
+    drivetrain.resetOdometry(new Pose2d(3, 3, new Rotation2d()));
+    SimulatedArena.getInstance().resetFieldForAuto();
+  }
+
+  public void updateSimulation() {
+    if (GlobalConstants.getMode() != Mode.SIM) return;
+
+    SimulatedArena.getInstance().simulationPeriodic();
+    Logger.recordOutput("FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
+    Logger.recordOutput("FieldSimulation/Fuel", SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel"));
   }
 
   public Command getAutonomousCommand() {

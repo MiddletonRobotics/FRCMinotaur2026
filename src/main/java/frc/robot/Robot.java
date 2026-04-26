@@ -265,6 +265,16 @@ public class Robot extends LoggedRobot {
   @Override
   public void testExit() {}
 
+  @Override
+  public void simulationInit() {
+    robotContainer.resetSimulationField();
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    robotContainer.updateSimulation();
+  }
+
   public static boolean isJITing() {
     return Timer.getTimestamp() < 45.0;
   }

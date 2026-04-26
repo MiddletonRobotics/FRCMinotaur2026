@@ -135,7 +135,6 @@ public class DrivetrainFactory {
                 .withVelocityX(0.0)
                 .withVelocityY(0.0)
                 .withTargetDirection(desiredHeading)
-                .withHeadingPID(3.0, 0.0, 0.0)
             );
 
             Logger.recordOutput("Drivetrain/AutoAim/DesiredHeading", desiredHeading);
