@@ -204,6 +204,7 @@ public class Robot extends LoggedRobot {
     }
 
     robotContainer.updateOnboardAlerts();
+    robotContainer.getRobotState().updateLogger();
 
     // JIT alert
     jitAlert.set(isJITing());
@@ -264,6 +265,16 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void testExit() {}
+
+  @Override
+  public void simulationInit() {
+    robotContainer.resetSimulationField();
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    robotContainer.updateSimulation();
+  }
 
   public static boolean isJITing() {
     return Timer.getTimestamp() < 45.0;

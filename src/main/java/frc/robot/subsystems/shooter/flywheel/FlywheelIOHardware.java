@@ -21,7 +21,6 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
-import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -38,7 +37,7 @@ import edu.wpi.first.units.measure.Voltage;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.ShooterConstants;
 
-public class ShooterIOHardware implements ShooterIO {
+public class FlywheelIOHardware implements FlywheelIO {
     public final TalonFX firstShooterMotor;
     public final TalonFX secondShooterMotor;
     public final TalonFX thirdShooterMotor;
@@ -73,7 +72,7 @@ public class ShooterIOHardware implements ShooterIO {
 
     private static final Executor brakeModeExecutor = Executors.newFixedThreadPool(1);
 
-    public ShooterIOHardware() {
+    public FlywheelIOHardware() {
         firstShooterMotor = new TalonFX(21, GlobalConstants.kRioBus.getParent());
         secondShooterMotor = new TalonFX(22, GlobalConstants.kRioBus.getParent());
         thirdShooterMotor = new TalonFX(23, GlobalConstants.kRioBus.getParent());
@@ -158,7 +157,7 @@ public class ShooterIOHardware implements ShooterIO {
     }
 
     @Override
-    public void updateInputs(ShooterIOInputs inputs) {
+    public void updateInputs(FlywheelIOInputs inputs) {
         inputs.firstShooterPosition = firstShooterPosition.getValue().in(Rotations);
         inputs.firstShooterVelocity = firstShooterVelocity.getValue().in(RotationsPerSecond) * 60;
         inputs.firstShooterAppliedVoltage = firstShooterAppliedVoltage.getValue().in(Volts);

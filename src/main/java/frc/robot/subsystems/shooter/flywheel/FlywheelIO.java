@@ -4,9 +4,9 @@ import org.littletonrobotics.junction.AutoLog;
 
 import frc.minolib.utilities.SubsystemDataProcessor;
 
-public interface ShooterIO extends SubsystemDataProcessor.IODataRefresher {
+public interface FlywheelIO extends SubsystemDataProcessor.IODataRefresher {
     @AutoLog
-    public class ShooterIOInputs {
+    public class FlywheelIOInputs {
         public boolean isFirstShooterConnected = false;
         public double firstShooterPosition = 0.0;
         public double firstShooterVelocity = 0.0;
@@ -32,7 +32,7 @@ public interface ShooterIO extends SubsystemDataProcessor.IODataRefresher {
         public boolean fourthShooterTempuratureFault = false;
     }
 
-    public void updateInputs(ShooterIOInputs inputs);
+    public void updateInputs(FlywheelIOInputs inputs);
 
     public void setVoltage(double voltage);
 

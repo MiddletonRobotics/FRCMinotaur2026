@@ -1,47 +1,28 @@
 package frc.robot.subsystems.shooter.flywheel;
 
 import java.util.function.BooleanSupplier;
-import java.util.function.DoubleSupplier;
 
-import org.ironmaple.simulation.Goal;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.Alert;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Alert.AlertType;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.minolib.advantagekit.LoggedTracer;
 import frc.minolib.advantagekit.LoggedTunableNumber;
-import frc.minolib.math.EqualsUtility;
-import frc.minolib.utilities.AllianceFlipUtility;
-import frc.minolib.utilities.AllianceFlipUtility;
 import frc.minolib.utilities.SubsystemDataProcessor;
 import frc.robot.Robot;
-import frc.robot.constants.FieldConstants;
 import frc.robot.constants.FieldConstants;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.ShooterConstants;
 import frc.robot.subsystems.shooter.ShootingPreset;
-import frc.robot.subsystems.shooter.ShootingPreset;
-import frc.robot.subsystems.shooter.flywheel.ShooterIO.ShooterIOInputs;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.Accessors;
 
-public class Shooter extends SubsystemBase {
+public class Flywheel extends SubsystemBase {
     private static final LoggedTunableNumber kP = new LoggedTunableNumber("Shooter/kP");
     private static final LoggedTunableNumber kD = new LoggedTunableNumber("Shooter/kD");
     private static final LoggedTunableNumber kS = new LoggedTunableNumber("Shooter/kS");
@@ -125,8 +106,8 @@ public class Shooter extends SubsystemBase {
         }
     }
 
-    private final ShooterIO io;
-    private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
+    private final FlywheelIO io;
+    private final FlywheelIOInputsAutoLogged inputs = new FlywheelIOInputsAutoLogged();
 
     private final Debouncer motorConnectedDebouncer = new Debouncer(0.5, Debouncer.DebounceType.kFalling);
     private final Debouncer readyDebouncer = new Debouncer(readyDebounceSeconds.get(), Debouncer.DebounceType.kFalling);
@@ -143,7 +124,6 @@ public class Shooter extends SubsystemBase {
 
     @AutoLogOutput(key = "Shooter/BrakeModeEnabled")
     private BooleanSupplier brakeModeEnabled = () -> false;
-    private boolean lastBrakeModeEnabled = false;
 
     @Getter private ShooterGoal goal = ShooterGoal.IDLE;
     @Getter private ShooterState state = ShooterState.IDLE;
@@ -152,7 +132,7 @@ public class Shooter extends SubsystemBase {
     @Getter @AutoLogOutput(key = "Shooter/VoltageSetpoint") private double voltageSetpoint = 0.0;
     @Getter @AutoLogOutput(key = "Shooter/VelocitySetpointRPM") private double velocitySetpoint = 0.0;
 
-    public Shooter(ShooterIO io) {
+    public Flywheel(FlywheelIO io) {
         this.io = io;
 
         SubsystemDataProcessor.createAndStartSubsystemDataProcessor(() -> {
@@ -194,18 +174,6 @@ public class Shooter extends SubsystemBase {
         Logger.recordOutput("Shooter/ShootingPreset", preset.toString());
 
         LoggedTracer.record("ShooterPeriodic");
-    }
-
-    private boolean calculateBrakeMode() {
-        if (brakeModeEnabled.getAsBoolean()) {
-            return true;
-        }
-        
-        if (DriverStation.isDisabled()) {
-            return false;
-        }
-        
-        return false;
     }
 
     private ShooterState handleStateTransition() {

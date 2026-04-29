@@ -1,5 +1,6 @@
 package frc.robot.subsystems.drivetrain;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
@@ -15,7 +16,7 @@ import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
-
+import com.google.flatbuffers.Constants;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
@@ -43,6 +44,8 @@ import frc.robot.constants.DrivetrainConstants;
 public class Drivetrain extends SubsystemBase {
     private DrivetrainIO io;
     private RobotState robotState;
+
+    protected DriveViz telemetry = new DriveViz(DrivetrainConstants.kMaximumLinearVelocity.in(MetersPerSecond));
 
     private DrivetrainIOInputsAutoLogged inputs = new DrivetrainIOInputsAutoLogged();
 
@@ -114,20 +117,18 @@ public class Drivetrain extends SubsystemBase {
         SWERVE_STEER
     }
 
-    private final Field2d driveVisualization = new Field2d();
-
     public Drivetrain(DrivetrainIO io, RobotState robotState) {
         this.io = io;
         this.robotState = robotState;
         
         configurePathPlanner();
-        SmartDashboard.putData("Drive Visualization", driveVisualization);
     }
 
     @Override
     public void periodic() {
         io.updateDrivetrainInputs(inputs);
         Logger.processInputs("Drivetrain", inputs);
+        telemetry.telemeterize(inputs);
 
         robotState.incrementIterationCount();
         if (DriverStation.isDisabled()) {
@@ -142,8 +143,7 @@ public class Drivetrain extends SubsystemBase {
                 hasAppliedOperatorPerspective = true;
             });
         }
-
-        driveVisualization.setRobotPose(robotState.getLatestFieldToRobot().getValue());
+        
         LoggedTracer.record("DrivetrainPeriodic");
     }
 

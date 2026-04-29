@@ -8,10 +8,11 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
+
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.ShooterConstants;
 
-public class ShooterIOSimulation implements ShooterIO {
+public class FlywheelIOSimulation implements FlywheelIO {
     private final DCMotor shooterGearbox;
     private final FlywheelSim shooterSimulation;
     private double shooterAppliedVoltage = 0.0;
@@ -20,7 +21,7 @@ public class ShooterIOSimulation implements ShooterIO {
     private boolean shooterClosedLoop = false;
     private boolean shooterControllerNeedsReset = false;
 
-    public ShooterIOSimulation() {
+    public FlywheelIOSimulation() {
         shooterGearbox = ShooterConstants.kShooterSimulatedGearbox;
         shooterSimulation = new FlywheelSim(
             LinearSystemId.createFlywheelSystem(
@@ -33,7 +34,7 @@ public class ShooterIOSimulation implements ShooterIO {
     }
 
     @Override
-    public void updateInputs(ShooterIOInputs inputs) {
+    public void updateInputs(FlywheelIOInputs inputs) {
         if (DriverStation.isDisabled()) {
             shooterControllerNeedsReset = true;
         }
